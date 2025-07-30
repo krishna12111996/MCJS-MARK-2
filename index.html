@@ -1,319 +1,170 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MCJS Mark -1 - Moot Court Scoring System</title>
+    <title>Moot Court Competition Management System</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
+        .timer-display {
+            font-family: 'Courier New', monospace;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        .bell-animation {
+            animation: ring 0.5s ease-in-out;
+        }
+        @keyframes ring {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
+        }
         .fade-in {
-            animation: fadeIn 0.5s ease-in;
+            animation: fadeIn 0.3s ease-in;
         }
-
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .slide-in {
-            animation: slideIn 0.3s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(-100%);
-            }
-
-            to {
-                transform: translateX(0);
-            }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
-
-<body class="bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 min-h-screen">
-    <!-- Login Screen -->
-    <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md fade-in">
-            <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-gray-800 mb-2">MCJS Mark -1.1</h1>
-                <p class="text-sm text-gray-600 leading-tight">VKT KRISHNADAS UNNI<br>SOUNDARYA COLLEGE OF LAW</p>
-                <div class="w-20 h-1 bg-gradient-to-r from-blue-500 to-purple-500 mx-auto mt-4"></div>
-            </div>
-
-            <div class="space-y-4">
-                <button onclick="showAdminLogin()"
-                    class="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
-                    <div class="flex items-center justify-center space-x-3">
-                        <span class="text-2xl">👨‍💼</span>
-                        <span>Admin Portal</span>
-                    </div>
-                </button>
-
-                <button onclick="showJudgeLogin()"
-                    class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
-                    <div class="flex items-center justify-center space-x-3">
-                        <span class="text-2xl">⚖️</span>
-                        <span>Judge Portal</span>
-                    </div>
-                </button>
-
-                <button onclick="showHostLogin()"
-                    class="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
-                    <div class="flex items-center justify-center space-x-3">
-                        <span class="text-2xl">📊</span>
-                        <span>Results Dashboard</span>
-                    </div>
-                </button>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg border-b-4 border-blue-600">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <h1 class="text-2xl font-bold text-gray-800">Moot Court Management System</h1>
+                <div class="flex space-x-4">
+                    <button onclick="showPortal('admin')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">Admin</button>
+                    <button onclick="showPortal('judge')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">Judge</button>
+                    <button onclick="showPortal('manager')" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors">Court Manager</button>
+                    <button onclick="showPortal('dashboard')" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg transition-colors">Dashboard</button>
+                </div>
             </div>
         </div>
-    </div>
+    </nav>
 
     <!-- Admin Portal -->
-    <div id="adminPortal" class="hidden min-h-screen p-4">
-        <div class="max-w-6xl mx-auto">
-            <div class="bg-white rounded-2xl shadow-2xl p-8 fade-in">
-                <div class="flex items-center justify-between mb-8">
-                    <h2 class="text-2xl font-bold text-gray-800">Admin Portal - Court Hall Management</h2>
-                    <button onclick="showLoginScreen()" class="text-gray-500 hover:text-gray-700 text-xl">✕</button>
-                </div>
-
-                <!-- Tab Navigation -->
-                <div class="flex space-x-4 mb-6">
-                    <button id="createCourtTab" onclick="showAdminTab('createCourt')"
-                        class="px-6 py-3 bg-red-600 text-white rounded-lg font-semibold">
-                        Create Court Assignment
-                    </button>
-                    <button id="manageCourtTab" onclick="showAdminTab('manageCourt')"
-                        class="px-6 py-3 bg-gray-300 text-gray-700 rounded-lg font-semibold">
-                        Manage Assignments
-                    </button>
-                </div>
-
-                <div id="adminContent">
-                    <!-- Admin content will be loaded here -->
+    <div id="admin-portal" class="portal hidden">
+        <div class="max-w-6xl mx-auto p-6">
+            <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Admin Portal</h2>
+            
+            <!-- Admin Login -->
+            <div id="admin-login" class="bg-white rounded-xl shadow-lg p-8 mb-8">
+                <h3 class="text-2xl font-semibold mb-6 text-center text-gray-700">Admin Login</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <button onclick="showAdminSection('create-competition')" class="bg-blue-600 hover:bg-blue-700 text-white py-4 px-6 rounded-lg text-lg font-semibold transition-colors">Create Competition</button>
+                    <button onclick="showAdminSection('court-assignment')" class="bg-green-600 hover:bg-green-700 text-white py-4 px-6 rounded-lg text-lg font-semibold transition-colors">Court Assignment</button>
+                    <button onclick="showAdminSection('manage-assignment')" class="bg-purple-600 hover:bg-purple-700 text-white py-4 px-6 rounded-lg text-lg font-semibold transition-colors">Manage Assignment</button>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Judge Login Screen -->
-    <div id="judgeLogin" class="hidden min-h-screen p-4">
-        <div class="max-w-4xl mx-auto">
-            <div class="bg-white rounded-2xl shadow-2xl p-8 fade-in">
-                <div class="flex items-center justify-between mb-8">
-                    <h2 class="text-2xl font-bold text-gray-800">Judge Portal - Select Your Assignment</h2>
-                    <button onclick="showLoginScreen()" class="text-gray-500 hover:text-gray-700 text-xl">✕</button>
-                </div>
-
-                <div class="grid md:grid-cols-2 gap-6 mb-8">
+            <!-- Create Competition -->
+            <div id="create-competition" class="admin-section hidden bg-white rounded-xl shadow-lg p-8">
+                <h3 class="text-2xl font-semibold mb-6 text-gray-700">Create Competition</h3>
+                <form id="competition-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Select Court Room</label>
-                        <select id="judgeCourtRoom" onchange="loadJudgeOptions()"
-                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">Select court room</option>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">College Name</label>
+                        <input type="text" id="college-name" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Competition Name</label>
+                        <input type="text" id="competition-name" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Date of Competition</label>
+                        <input type="date" id="competition-date" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">No of Teams Participating</label>
+                        <input type="number" id="teams-count" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="1" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">No of Court Rooms Allocated</label>
+                        <input type="number" id="courtrooms-count" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="1" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Time Allocated per Team (minutes)</label>
+                        <input type="number" id="time-per-team" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" min="1" value="30" required>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Rounds</label>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" id="prelims1" class="w-4 h-4 text-blue-600">
+                                <span>Prelims 1</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" id="prelims2" class="w-4 h-4 text-blue-600">
+                                <span>Prelims 2</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" id="octa" class="w-4 h-4 text-blue-600">
+                                <span>Octa</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" id="quarters" class="w-4 h-4 text-blue-600">
+                                <span>Quarters</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" id="semi" class="w-4 h-4 text-blue-600">
+                                <span>Semi</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" id="finals" class="w-4 h-4 text-blue-600">
+                                <span>Finals</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">College Logo URL</label>
+                        <input type="url" id="college-logo" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Moot Society Logo URL</label>
+                        <input type="url" id="society-logo" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div class="md:col-span-2">
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg text-lg font-semibold transition-colors">Create Competition</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Court Assignment -->
+            <div id="court-assignment" class="admin-section hidden bg-white rounded-xl shadow-lg p-8">
+                <h3 class="text-2xl font-semibold mb-6 text-gray-700">Court Assignment</h3>
+                <form id="court-assignment-form" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Select College</label>
+                        <select id="college-select" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                            <option value="">Select College</option>
                         </select>
                     </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Select Your Name</label>
-                        <select id="judgeNameSelect" onchange="showAssignmentDetails()"
-                            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">Select your name</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div id="assignmentDetails" class="hidden">
-                    <!-- Assignment details will be shown here -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Scoring Screen -->
-    <div id="scoringScreen" class="hidden min-h-screen p-4">
-        <div class="max-w-6xl mx-auto">
-            <div class="bg-white rounded-2xl shadow-2xl p-8 fade-in">
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-800">Scoring Interface</h2>
-                        <p id="scoringInfo" class="text-gray-600"></p>
-                    </div>
-                    <button onclick="showJudgeLogin()" class="text-gray-500 hover:text-gray-700 text-xl">← Back</button>
-                </div>
-
-                <div class="flex space-x-4 mb-6">
-                    <button id="petitionerTab" onclick="showTeamScoring('petitioner')"
-                        class="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold">
-                        Petitioner Scoring
-                    </button>
-                    <button id="respondentTab" onclick="showTeamScoring('respondent')"
-                        class="px-6 py-3 bg-gray-300 text-gray-700 rounded-lg font-semibold">
-                        Respondent Scoring
-                    </button>
-                </div>
-
-                <div id="teamScoringContainer">
-                    <!-- Team scoring forms will be generated here -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Host Dashboard -->
-    <div id="hostDashboard" class="hidden min-h-screen p-4">
-        <div class="max-w-7xl mx-auto">
-            <div class="bg-white rounded-2xl shadow-2xl p-8 fade-in">
-                <div class="flex items-center justify-between mb-8">
-                    <h2 class="text-2xl font-bold text-gray-800">Results Dashboard - Tournament Results</h2>
-                    <button onclick="showLoginScreen()" class="text-gray-500 hover:text-gray-700 text-xl">✕</button>
-                </div>
-
-                <!-- Tab Navigation -->
-                <div class="flex space-x-4 mb-6">
-                    <button id="prelimsTab" onclick="showDashboardTab('prelims')"
-                        class="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold">
-                        Prelims Rankings
-                    </button>
-                    <button id="knockoutsTab" onclick="showDashboardTab('knockouts')"
-                        class="px-6 py-3 bg-gray-300 text-gray-700 rounded-lg font-semibold">
-                        Knockout Rounds
-                    </button>
-                    <button id="statisticsTab" onclick="showDashboardTab('statistics')"
-                        class="px-6 py-3 bg-gray-300 text-gray-700 rounded-lg font-semibold">
-                        Statistics
-                    </button>
-                </div>
-
-                <!-- Tab Content -->
-                <div id="dashboardContent">
-                    <!-- Content will be loaded here -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Score Detail Modal -->
-    <div id="scoreDetailModal"
-        class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-2xl font-bold text-gray-800">Detailed Score Breakdown</h3>
-                <button onclick="closeScoreDetail()" class="text-gray-500 hover:text-gray-700 text-xl">✕</button>
-            </div>
-            <div id="scoreDetailContent">
-                <!-- Detailed score content will be displayed here -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Thank You Certificate Modal -->
-    <div id="thankYouModal"
-        class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div id="certificateContent">
-                <!-- Certificate content will be displayed here -->
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Global variables
-        let courtAssignments = JSON.parse(localStorage.getItem('mcjsCourtAssignments') || '{}');
-        let allScores = JSON.parse(localStorage.getItem('mcjsScores') || '{}');
-        let currentAssignment = {};
-        let currentTeam = 'petitioner';
-
-        // Screen navigation functions
-        function showLoginScreen() {
-            hideAllScreens();
-            document.getElementById('loginScreen').classList.remove('hidden');
-        }
-
-        function showAdminLogin() {
-            hideAllScreens();
-            document.getElementById('adminPortal').classList.remove('hidden');
-            showAdminTab('createCourt');
-        }
-
-        function showJudgeLogin() {
-            hideAllScreens();
-            document.getElementById('judgeLogin').classList.remove('hidden');
-            loadCourtRoomOptions();
-        }
-
-        function showHostLogin() {
-            hideAllScreens();
-            document.getElementById('hostDashboard').classList.remove('hidden');
-            loadHostDashboard();
-        }
-
-        function hideAllScreens() {
-            const screens = ['loginScreen', 'adminPortal', 'judgeLogin', 'scoringScreen', 'hostDashboard'];
-            screens.forEach(screen => {
-                document.getElementById(screen).classList.add('hidden');
-            });
-        }
-
-        // Admin Portal Functions
-        function showAdminTab(tab) {
-            // Update tab styling
-            document.getElementById('createCourtTab').className = tab === 'createCourt' ?
-                'px-6 py-3 bg-red-600 text-white rounded-lg font-semibold' :
-                'px-6 py-3 bg-gray-300 text-gray-700 rounded-lg font-semibold';
-
-            document.getElementById('manageCourtTab').className = tab === 'manageCourt' ?
-                'px-6 py-3 bg-red-600 text-white rounded-lg font-semibold' :
-                'px-6 py-3 bg-gray-300 text-gray-700 rounded-lg font-semibold';
-
-            const content = document.getElementById('adminContent');
-
-            if (tab === 'createCourt') {
-                showCreateCourtForm();
-            } else if (tab === 'manageCourt') {
-                showManageCourtAssignments();
-            }
-        }
-
-        function showCreateCourtForm() {
-            const content = document.getElementById('adminContent');
-            content.innerHTML = `
-                <div class="bg-gradient-to-r from-red-50 to-red-100 rounded-xl p-6">
-                    <h3 class="text-xl font-bold text-red-800 mb-6">Create New Court Assignment</h3>
-                    
-                    <form id="courtAssignmentForm" class="space-y-6">
-                        <div class="grid md:grid-cols-3 gap-6">
+                    <div id="assignment-form" class="hidden space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Competition Name</label>
+                            <input type="text" id="comp-name-display" class="w-full p-3 border border-gray-300 rounded-lg bg-gray-100" readonly>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Court Room Number</label>
-                                <input type="text" id="adminCourtRoom" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent" placeholder="Enter court room number" required>
+                                <input type="text" id="court-number" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
                             </div>
-                            
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Round</label>
-                                <select id="adminRound" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent" required>
-                                    <option value="">Select round</option>
-                                    <option value="PRELIMS 1">PRELIMS 1</option>
-                                    <option value="PRELIMS 2">PRELIMS 2</option>
-                                    <option value="OCTAS">OCTAS</option>
-                                    <option value="QUARTERS">QUARTERS</option>
-                                    <option value="SEMI">SEMI</option>
-                                    <option value="FINALS">FINALS</option>
+                                <select id="round-select" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                                    <option value="">Select Round</option>
                                 </select>
                             </div>
-                            
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Number of Judges</label>
-                                <select id="adminNumJudges" onchange="generateAdminJudgeFields()" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent" required>
-                                    <option value="">Select number</option>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Court Password</label>
+                                <input type="password" id="court-password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Number of Judges (1-5)</label>
+                                <select id="judges-count" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                                    <option value="">Select</option>
                                     <option value="1">1</option>
                                     <option value="2">2</option>
                                     <option value="3">3</option>
@@ -322,1706 +173,1495 @@
                                 </select>
                             </div>
                         </div>
-                        
-                        <div class="grid md:grid-cols-2 gap-6">
+                        <div id="judges-details" class="hidden space-y-4">
+                            <h4 class="text-lg font-semibold text-gray-700">Judge Details</h4>
+                            <div id="judges-container"></div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Petitioner Team Code</label>
-                                <input type="text" id="adminPetitionerCode" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent" placeholder="Enter petitioner team code" required>
+                                <input type="text" id="petitioner-code" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
                             </div>
-                            
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Respondent Team Code</label>
-                                <input type="text" id="adminRespondentCode" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent" placeholder="Enter respondent team code" required>
+                                <input type="text" id="respondent-code" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Court Manager Name</label>
+                                <input type="text" id="manager-name" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Manager Password</label>
+                                <input type="password" id="manager-password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
                             </div>
                         </div>
-                        
-                        <div id="adminJudgeNamesContainer" class="space-y-4"></div>
-                        
-                        <button type="submit" class="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
-                            Create Court Assignment
-                        </button>
-                    </form>
-                </div>
-            `;
+                        <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg text-lg font-semibold transition-colors">Submit Assignment</button>
+                    </div>
+                </form>
+            </div>
 
-            // Add form submission handler
-            document.getElementById('courtAssignmentForm').addEventListener('submit', handleCourtAssignmentSubmit);
-        }
+            <!-- Manage Assignment -->
+            <div id="manage-assignment" class="admin-section hidden bg-white rounded-xl shadow-lg p-8">
+                <h3 class="text-2xl font-semibold mb-6 text-gray-700">Manage Assignment</h3>
+                <div id="manage-colleges" class="space-y-4"></div>
+            </div>
+        </div>
+    </div>
 
-        function generateAdminJudgeFields() {
-            const numJudges = parseInt(document.getElementById('adminNumJudges').value);
-            const container = document.getElementById('adminJudgeNamesContainer');
-            container.innerHTML = '';
+    <!-- Judge Portal -->
+    <div id="judge-portal" class="portal hidden">
+        <div class="max-w-4xl mx-auto p-6">
+            <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Judge Portal</h2>
+            
+            <!-- Judge Login -->
+            <div id="judge-login" class="bg-white rounded-xl shadow-lg p-8 mb-8">
+                <h3 class="text-2xl font-semibold mb-6 text-center text-gray-700">Judge Login</h3>
+                <form id="judge-login-form" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Competition Name</label>
+                        <select id="judge-competition" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                            <option value="">Select Competition</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Court Room Number</label>
+                        <select id="judge-courtroom" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                            <option value="">Select Court Room</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Judge Name</label>
+                        <select id="judge-name" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                            <option value="">Select Judge</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg text-lg font-semibold transition-colors">Login</button>
+                </form>
+            </div>
 
-            if (numJudges > 0) {
-                const judgeFieldsDiv = document.createElement('div');
-                judgeFieldsDiv.innerHTML = '<h4 class="text-lg font-semibold text-gray-800 mb-4">Judge Names</h4>';
-
-                for (let i = 1; i <= numJudges; i++) {
-                    judgeFieldsDiv.innerHTML += `
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Judge ${i} Name</label>
-                            <input type="text" id="adminJudge${i}Name" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent" placeholder="Enter judge name" required>
+            <!-- Score Sheet -->
+            <div id="score-sheet" class="hidden bg-white rounded-xl shadow-lg p-8">
+                <h3 class="text-2xl font-semibold mb-6 text-gray-700">Score Sheet</h3>
+                <div id="scoring-section">
+                    <!-- Team Selection -->
+                    <div id="team-selection" class="mb-8">
+                        <div class="flex justify-center space-x-4">
+                            <button id="petitioner-btn" onclick="selectTeam('petitioner')" class="bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg text-lg font-semibold transition-colors">Score Petitioner</button>
+                            <button id="respondent-btn" onclick="selectTeam('respondent')" class="bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg text-lg font-semibold transition-colors hidden">Score Respondent</button>
                         </div>
-                    `;
-                }
-                container.appendChild(judgeFieldsDiv);
+                    </div>
+
+                    <!-- Scoring Form -->
+                    <div id="scoring-form" class="hidden">
+                        <h4 id="current-team" class="text-xl font-semibold mb-6 text-center"></h4>
+                        
+                        <!-- Speaker Selection -->
+                        <div class="mb-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Speaker 1 Gender</label>
+                                    <select id="speaker1-gender" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                                        <option value="">Select Gender</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Speaker 2 Gender</label>
+                                    <select id="speaker2-gender" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                                        <option value="">Select Gender</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scoring Parameters -->
+                        <div class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Speaker 1 -->
+                                <div class="border rounded-lg p-4">
+                                    <h5 class="text-lg font-semibold mb-4 text-center">Speaker 1</h5>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Perusal of Facts (10 marks)</label>
+                                            <input type="number" id="s1-perusal" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500" min="0" max="10" required>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Knowledge & Application of Law (20 marks)</label>
+                                            <input type="number" id="s1-knowledge" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500" min="0" max="20" required>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Organization & Presentation (20 marks)</label>
+                                            <input type="number" id="s1-organization" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500" min="0" max="20" required>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Clarity & Legal Reasoning (20 marks)</label>
+                                            <input type="number" id="s1-clarity" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500" min="0" max="20" required>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Persuasiveness & Response (20 marks)</label>
+                                            <input type="number" id="s1-persuasiveness" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500" min="0" max="20" required>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Team Coordination (10 marks)</label>
+                                            <input type="number" id="s1-coordination" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500" min="0" max="10" required>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Courtroom Etiquette (10 marks)</label>
+                                            <input type="number" id="s1-etiquette" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500" min="0" max="10" required>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Speaker 2 -->
+                                <div class="border rounded-lg p-4">
+                                    <h5 class="text-lg font-semibold mb-4 text-center">Speaker 2</h5>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Perusal of Facts (10 marks)</label>
+                                            <input type="number" id="s2-perusal" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500" min="0" max="10" required>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Knowledge & Application of Law (20 marks)</label>
+                                            <input type="number" id="s2-knowledge" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500" min="0" max="20" required>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Organization & Presentation (20 marks)</label>
+                                            <input type="number" id="s2-organization" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500" min="0" max="20" required>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Clarity & Legal Reasoning (20 marks)</label>
+                                            <input type="number" id="s2-clarity" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500" min="0" max="20" required>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Persuasiveness & Response (20 marks)</label>
+                                            <input type="number" id="s2-persuasiveness" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500" min="0" max="20" required>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Team Coordination (10 marks)</label>
+                                            <input type="number" id="s2-coordination" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500" min="0" max="10" required>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Courtroom Etiquette (10 marks)</label>
+                                            <input type="number" id="s2-etiquette" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500" min="0" max="10" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-8 text-center">
+                            <button onclick="submitTeamScore()" class="bg-green-600 hover:bg-green-700 text-white py-3 px-8 rounded-lg text-lg font-semibold transition-colors">Submit Score</button>
+                        </div>
+                    </div>
+
+                    <!-- Thank You Card -->
+                    <div id="thank-you-card" class="hidden text-center">
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-8">
+                            <h3 class="text-2xl font-semibold text-green-800 mb-4">Thank You!</h3>
+                            <p class="text-green-700 mb-6">Your scores have been submitted successfully.</p>
+                            <button onclick="resetJudgePortal()" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg font-semibold transition-colors">Done</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Court Manager Portal -->
+    <div id="manager-portal" class="portal hidden">
+        <div class="max-w-4xl mx-auto p-6">
+            <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Court Manager Portal</h2>
+            
+            <!-- Manager Login -->
+            <div id="manager-login" class="bg-white rounded-xl shadow-lg p-8 mb-8">
+                <h3 class="text-2xl font-semibold mb-6 text-center text-gray-700">Manager Login</h3>
+                <form id="manager-login-form" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Manager Name</label>
+                        <select id="manager-name-select" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                            <option value="">Select Manager</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input type="password" id="manager-login-password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Round</label>
+                        <select id="manager-round" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                            <option value="">Select Round</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-lg text-lg font-semibold transition-colors">Login</button>
+                </form>
+            </div>
+
+            <!-- Time Keeping Section -->
+            <div id="time-keeping" class="hidden bg-white rounded-xl shadow-lg p-8">
+                <h3 class="text-2xl font-semibold mb-6 text-gray-700">Time Keeping</h3>
+                
+                <!-- Time Allocation Setup -->
+                <div id="time-setup" class="mb-8">
+                    <h4 class="text-lg font-semibold mb-4">Time Allocation (30 minutes total per team)</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Petitioner Time Setup -->
+                        <div class="border rounded-lg p-4">
+                            <h5 class="text-md font-semibold mb-4 text-center text-blue-600">Petitioner</h5>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Speaker 1 Time (minutes)</label>
+                                    <input type="number" id="pet-s1-time" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500" min="1" max="28" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Speaker 2 Time (minutes)</label>
+                                    <input type="number" id="pet-s2-time" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500" min="1" max="28" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Rebuttal Time (minutes)</label>
+                                    <input type="number" id="pet-rebuttal-time" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500" min="0" max="28" required>
+                                </div>
+                                <div class="text-sm text-gray-600">
+                                    Total: <span id="pet-total">0</span> minutes
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Respondent Time Setup -->
+                        <div class="border rounded-lg p-4">
+                            <h5 class="text-md font-semibold mb-4 text-center text-green-600">Respondent</h5>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Speaker 1 Time (minutes)</label>
+                                    <input type="number" id="res-s1-time" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500" min="1" max="28" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Speaker 2 Time (minutes)</label>
+                                    <input type="number" id="res-s2-time" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500" min="1" max="28" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Rebuttal Time (minutes)</label>
+                                    <input type="number" id="res-rebuttal-time" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500" min="0" max="28" required>
+                                </div>
+                                <div class="text-sm text-gray-600">
+                                    Total: <span id="res-total">0</span> minutes
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-4">
+                        <button onclick="startTimekeeping()" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg font-semibold transition-colors">Start Timekeeping</button>
+                    </div>
+                </div>
+
+                <!-- Timer Display -->
+                <div id="timer-display" class="hidden">
+                    <div class="text-center mb-8">
+                        <h4 id="current-speaker" class="text-xl font-semibold mb-4"></h4>
+                        <div id="timer" class="timer-display text-4xl mb-4">00:00:000</div>
+                        <div class="space-x-4">
+                            <button id="start-btn" onclick="startTimer()" class="bg-green-600 hover:bg-green-700 text-white py-2 px-6 rounded-lg font-semibold transition-colors">Start</button>
+                            <button id="pause-btn" onclick="pauseTimer()" class="bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-6 rounded-lg font-semibold transition-colors hidden">Pause</button>
+                            <button id="next-speaker-btn" onclick="nextSpeaker()" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg font-semibold transition-colors hidden">Next Speaker</button>
+                        </div>
+                        <div class="mt-4">
+                            <button onclick="addExtraTime(120)" class="bg-orange-600 hover:bg-orange-700 text-white py-1 px-4 rounded font-semibold transition-colors mr-2">+2 min</button>
+                            <button onclick="addExtraTime(30)" class="bg-orange-600 hover:bg-orange-700 text-white py-1 px-4 rounded font-semibold transition-colors">+30 sec</button>
+                        </div>
+                    </div>
+
+                    <!-- Bell Icon -->
+                    <div class="text-center mb-4">
+                        <div id="bell" class="text-4xl">🔔</div>
+                    </div>
+
+                    <!-- Progress Tracking -->
+                    <div id="progress-tracking" class="bg-gray-50 rounded-lg p-4">
+                        <h5 class="font-semibold mb-2">Progress</h5>
+                        <div id="progress-list" class="space-y-2"></div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="text-center mt-8">
+                        <button id="submit-timekeeping" onclick="submitTimekeeping()" class="bg-green-600 hover:bg-green-700 text-white py-3 px-8 rounded-lg text-lg font-semibold transition-colors hidden">Submit Timekeeping</button>
+                    </div>
+                </div>
+
+                <!-- Thank You Card -->
+                <div id="manager-thank-you" class="hidden text-center">
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-8">
+                        <h3 class="text-2xl font-semibold text-green-800 mb-4">Thank You!</h3>
+                        <p class="text-green-700 mb-6">Timekeeping data has been submitted successfully.</p>
+                        <button onclick="resetManagerPortal()" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg font-semibold transition-colors">Done</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard-portal" class="portal hidden">
+        <div class="max-w-7xl mx-auto p-6">
+            <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Dashboard</h2>
+            
+            <!-- Competition Selection -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <div class="flex items-center space-x-4">
+                    <label class="text-lg font-semibold text-gray-700">Select Competition:</label>
+                    <select id="dashboard-competition" class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Select Competition</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Round Tabs -->
+            <div id="dashboard-content" class="hidden">
+                <div class="bg-white rounded-xl shadow-lg mb-8">
+                    <div class="border-b border-gray-200">
+                        <nav class="flex space-x-8 px-6" id="round-tabs">
+                            <!-- Tabs will be generated dynamically -->
+                        </nav>
+                    </div>
+                </div>
+
+                <!-- Round Content -->
+                <div id="round-content" class="bg-white rounded-xl shadow-lg p-6">
+                    <!-- Content will be generated dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global data storage
+        let competitions = JSON.parse(localStorage.getItem('competitions') || '[]');
+        let courtAssignments = JSON.parse(localStorage.getItem('courtAssignments') || '[]');
+        let judgeScores = JSON.parse(localStorage.getItem('judgeScores') || '[]');
+        let timekeepingData = JSON.parse(localStorage.getItem('timekeepingData') || '[]');
+
+        // Current state variables
+        let currentPortal = 'admin';
+        let currentTeam = '';
+        let currentJudgeSession = null;
+        let currentManagerSession = null;
+        let timerInterval = null;
+        let currentTimerData = null;
+        let speakerQueue = [];
+        let currentSpeakerIndex = 0;
+
+        // Portal Navigation
+        function showPortal(portal) {
+            document.querySelectorAll('.portal').forEach(p => p.classList.add('hidden'));
+            document.getElementById(portal + '-portal').classList.remove('hidden');
+            currentPortal = portal;
+            
+            if (portal === 'judge') {
+                loadJudgeCompetitions();
+            } else if (portal === 'manager') {
+                loadManagerData();
+            } else if (portal === 'dashboard') {
+                loadDashboard();
             }
         }
 
-        function handleCourtAssignmentSubmit(e) {
+        // Admin Portal Functions
+        function showAdminSection(section) {
+            document.querySelectorAll('.admin-section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(section).classList.remove('hidden');
+            
+            if (section === 'court-assignment') {
+                loadCollegeOptions();
+            } else if (section === 'manage-assignment') {
+                loadManageAssignments();
+            }
+        }
+
+        // Competition Form Handler
+        document.getElementById('competition-form').addEventListener('submit', function(e) {
             e.preventDefault();
-
-            const courtRoom = document.getElementById('adminCourtRoom').value.trim();
-            const round = document.getElementById('adminRound').value;
-            const numJudges = parseInt(document.getElementById('adminNumJudges').value);
-            const petitionerCode = document.getElementById('adminPetitionerCode').value.trim();
-            const respondentCode = document.getElementById('adminRespondentCode').value.trim();
-
-            // Collect judge names
-            const judges = [];
-            for (let i = 1; i <= numJudges; i++) {
-                const judgeName = document.getElementById(`adminJudge${i}Name`).value.trim();
-                if (judgeName) judges.push(judgeName);
-            }
-
-            // Validate all fields
-            if (!courtRoom || !round || !numJudges || !petitionerCode || !respondentCode || judges.length !== numJudges) {
-                alert('Please fill in all required fields.');
-                return;
-            }
-
-            // Check if court assignment already exists
-            const assignmentKey = `${round}_${courtRoom}`;
-            if (courtAssignments[assignmentKey]) {
-                if (!confirm(`Court Room ${courtRoom} for ${round} already exists. Do you want to overwrite it?`)) {
-                    return;
+            
+            const formData = new FormData(e.target);
+            const rounds = [];
+            
+            ['prelims1', 'prelims2', 'octa', 'quarters', 'semi', 'finals'].forEach(round => {
+                if (document.getElementById(round).checked) {
+                    rounds.push(round);
                 }
-            }
+            });
 
-            // Create assignment
-            const assignment = {
-                courtRoom: courtRoom,
-                round: round,
-                numJudges: numJudges,
-                judges: judges,
-                petitionerCode: petitionerCode,
-                respondentCode: respondentCode,
+            const competition = {
+                id: Date.now(),
+                collegeName: document.getElementById('college-name').value,
+                competitionName: document.getElementById('competition-name').value,
+                date: document.getElementById('competition-date').value,
+                teamsCount: parseInt(document.getElementById('teams-count').value),
+                courtroomsCount: parseInt(document.getElementById('courtrooms-count').value),
+                timePerTeam: parseInt(document.getElementById('time-per-team').value),
+                rounds: rounds,
+                collegeLogo: document.getElementById('college-logo').value,
+                societyLogo: document.getElementById('society-logo').value,
                 createdAt: new Date().toISOString()
             };
 
-            // Save assignment
-            courtAssignments[assignmentKey] = assignment;
-            localStorage.setItem('mcjsCourtAssignments', JSON.stringify(courtAssignments));
+            competitions.push(competition);
+            localStorage.setItem('competitions', JSON.stringify(competitions));
+            
+            alert('Competition created successfully!');
+            e.target.reset();
+        });
 
-            alert(`✅ Court assignment created successfully!\n\nCourt Room: ${courtRoom}\nRound: ${round}\nJudges: ${judges.join(', ')}\nTeams: ${petitionerCode} vs ${respondentCode}`);
-
-            // Reset form
-            document.getElementById('courtAssignmentForm').reset();
-            document.getElementById('adminJudgeNamesContainer').innerHTML = '';
+        // Load college options for court assignment
+        function loadCollegeOptions() {
+            const select = document.getElementById('college-select');
+            select.innerHTML = '<option value="">Select College</option>';
+            
+            competitions.forEach(comp => {
+                const option = document.createElement('option');
+                option.value = comp.id;
+                option.textContent = comp.collegeName;
+                select.appendChild(option);
+            });
         }
 
-        function showManageCourtAssignments() {
-            const content = document.getElementById('adminContent');
-
-            if (Object.keys(courtAssignments).length === 0) {
-                content.innerHTML = `
-                    <div class="text-center py-12">
-                        <div class="text-6xl mb-4">📋</div>
-                        <h3 class="text-xl font-semibold text-gray-700 mb-2">No Court Assignments Yet</h3>
-                        <p class="text-gray-500">Create your first court assignment to get started.</p>
-                    </div>
-                `;
-                return;
+        // Handle college selection
+        document.getElementById('college-select').addEventListener('change', function() {
+            const competitionId = this.value;
+            if (competitionId) {
+                const competition = competitions.find(c => c.id == competitionId);
+                if (competition) {
+                    document.getElementById('comp-name-display').value = competition.competitionName;
+                    
+                    // Load rounds
+                    const roundSelect = document.getElementById('round-select');
+                    roundSelect.innerHTML = '<option value="">Select Round</option>';
+                    competition.rounds.forEach(round => {
+                        const option = document.createElement('option');
+                        option.value = round;
+                        option.textContent = round.charAt(0).toUpperCase() + round.slice(1);
+                        roundSelect.appendChild(option);
+                    });
+                    
+                    document.getElementById('assignment-form').classList.remove('hidden');
+                }
+            } else {
+                document.getElementById('assignment-form').classList.add('hidden');
             }
+        });
 
-            let html = `
-                <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-6">
-                    <h3 class="text-xl font-bold text-gray-800 mb-6">Manage Court Assignments</h3>
-                    <div class="space-y-4">
-            `;
-
-            Object.entries(courtAssignments).forEach(([key, assignment]) => {
-                html += `
-                    <div class="bg-white rounded-lg p-6 shadow-sm border">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h4 class="text-lg font-bold text-gray-800">Court Room ${assignment.courtRoom} - ${assignment.round}</h4>
-                                <p class="text-sm text-gray-600">Created: ${new Date(assignment.createdAt).toLocaleString()}</p>
-                            </div>
-                            <button onclick="deleteCourtAssignment('${key}')" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">
-                                Delete
-                            </button>
+        // Handle judges count change
+        document.getElementById('judges-count').addEventListener('change', function() {
+            const count = parseInt(this.value);
+            const container = document.getElementById('judges-container');
+            container.innerHTML = '';
+            
+            if (count > 0) {
+                for (let i = 1; i <= count; i++) {
+                    const judgeDiv = document.createElement('div');
+                    judgeDiv.className = 'grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg';
+                    judgeDiv.innerHTML = `
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Judge ${i} Title</label>
+                            <select id="judge${i}-title" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500" required>
+                                <option value="">Select Title</option>
+                                <option value="Mr.">Mr.</option>
+                                <option value="Mrs.">Mrs.</option>
+                                <option value="Miss">Miss</option>
+                                <option value="Dr.">Dr.</option>
+                                <option value="Prof.">Prof.</option>
+                                <option value="Hon.">Hon.</option>
+                            </select>
                         </div>
-                        
-                        <div class="grid md:grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <p class="text-sm font-medium text-gray-700">Teams:</p>
-                                <p class="text-sm text-gray-600">${assignment.petitionerCode} vs ${assignment.respondentCode}</p>
-                            </div>
-                            <div>
-                                <p class="text-sm font-medium text-gray-700">Judges (${assignment.numJudges}):</p>
-                                <p class="text-sm text-gray-600">${assignment.judges.join(', ')}</p>
-                            </div>
-                        </div>
-                        
-                        <div class="bg-gray-50 rounded-lg p-3">
-                            <p class="text-xs text-gray-500 mb-2">Scoring Status:</p>
-                            <div class="grid grid-cols-2 gap-2 text-xs">
-                `;
-
-                // Check scoring status for each judge
-                assignment.judges.forEach(judge => {
-                    const petitionerKey = `${assignment.round}_${assignment.courtRoom}_${assignment.petitionerCode}_${judge}`;
-                    const respondentKey = `${assignment.round}_${assignment.courtRoom}_${assignment.respondentCode}_${judge}`;
-
-                    const petitionerDone = allScores[petitionerKey] ? '✅' : '⏳';
-                    const respondentDone = allScores[respondentKey] ? '✅' : '⏳';
-
-                    html += `
-                        <div class="bg-white p-2 rounded">
-                            <p class="font-medium">${judge}</p>
-                            <p>Petitioner: ${petitionerDone} | Respondent: ${respondentDone}</p>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Judge ${i} Name</label>
+                            <input type="text" id="judge${i}-name" class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500" required>
                         </div>
                     `;
+                    container.appendChild(judgeDiv);
+                }
+                document.getElementById('judges-details').classList.remove('hidden');
+            } else {
+                document.getElementById('judges-details').classList.add('hidden');
+            }
+        });
+
+        // Court Assignment Form Handler
+        document.getElementById('court-assignment-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const competitionId = document.getElementById('college-select').value;
+            const judgesCount = parseInt(document.getElementById('judges-count').value);
+            const judges = [];
+            
+            for (let i = 1; i <= judgesCount; i++) {
+                judges.push({
+                    title: document.getElementById(`judge${i}-title`).value,
+                    name: document.getElementById(`judge${i}-name`).value
                 });
+            }
 
-                html += `
-                            </div>
+            const assignment = {
+                id: Date.now(),
+                competitionId: competitionId,
+                courtNumber: document.getElementById('court-number').value,
+                round: document.getElementById('round-select').value,
+                courtPassword: document.getElementById('court-password').value,
+                judges: judges,
+                petitionerCode: document.getElementById('petitioner-code').value,
+                respondentCode: document.getElementById('respondent-code').value,
+                managerName: document.getElementById('manager-name').value,
+                managerPassword: document.getElementById('manager-password').value,
+                createdAt: new Date().toISOString()
+            };
+
+            courtAssignments.push(assignment);
+            localStorage.setItem('courtAssignments', JSON.stringify(courtAssignments));
+            
+            alert('Court assignment created successfully!');
+            e.target.reset();
+            document.getElementById('assignment-form').classList.add('hidden');
+            document.getElementById('judges-details').classList.add('hidden');
+        });
+
+        // Load manage assignments
+        function loadManageAssignments() {
+            const container = document.getElementById('manage-colleges');
+            container.innerHTML = '';
+            
+            competitions.forEach(comp => {
+                const assignments = courtAssignments.filter(a => a.competitionId == comp.id);
+                if (assignments.length > 0) {
+                    const collegeDiv = document.createElement('div');
+                    collegeDiv.className = 'border rounded-lg p-4';
+                    collegeDiv.innerHTML = `
+                        <h4 class="text-lg font-semibold mb-4 cursor-pointer text-blue-600 hover:text-blue-800" onclick="toggleAssignments('${comp.id}')">
+                            ${comp.collegeName} - ${comp.competitionName} (${assignments.length} assignments)
+                        </h4>
+                        <div id="assignments-${comp.id}" class="hidden space-y-4">
+                            ${assignments.map(assignment => `
+                                <div class="bg-gray-50 rounded-lg p-4">
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div><strong>Court:</strong> ${assignment.courtNumber}</div>
+                                        <div><strong>Round:</strong> ${assignment.round}</div>
+                                        <div><strong>Manager:</strong> ${assignment.managerName}</div>
+                                        <div><strong>Petitioner:</strong> ${assignment.petitionerCode}</div>
+                                        <div><strong>Respondent:</strong> ${assignment.respondentCode}</div>
+                                        <div><strong>Judges:</strong> ${assignment.judges.map(j => j.title + ' ' + j.name).join(', ')}</div>
+                                    </div>
+                                    <div class="mt-4">
+                                        <button onclick="editAssignment('${assignment.id}')" class="bg-yellow-600 hover:bg-yellow-700 text-white py-1 px-3 rounded text-sm transition-colors">Edit</button>
+                                        <button onclick="deleteAssignment('${assignment.id}')" class="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded text-sm transition-colors ml-2">Delete</button>
+                                    </div>
+                                </div>
+                            `).join('')}
                         </div>
-                    </div>
-                `;
+                    `;
+                    container.appendChild(collegeDiv);
+                }
             });
-
-            html += `
-                    </div>
-                </div>
-            `;
-
-            content.innerHTML = html;
         }
 
-        function deleteCourtAssignment(key) {
-            const assignment = courtAssignments[key];
-            if (confirm(`Are you sure you want to delete the assignment for Court Room ${assignment.courtRoom} - ${assignment.round}?\n\nThis action cannot be undone.`)) {
-                delete courtAssignments[key];
-                localStorage.setItem('mcjsCourtAssignments', JSON.stringify(courtAssignments));
-                showManageCourtAssignments(); // Refresh the view
-                alert('Court assignment deleted successfully.');
+        function toggleAssignments(competitionId) {
+            const element = document.getElementById(`assignments-${competitionId}`);
+            element.classList.toggle('hidden');
+        }
+
+        function editAssignment(assignmentId) {
+            // Implementation for editing assignments
+            alert('Edit functionality would be implemented here');
+        }
+
+        function deleteAssignment(assignmentId) {
+            if (confirm('Are you sure you want to delete this assignment?')) {
+                courtAssignments = courtAssignments.filter(a => a.id != assignmentId);
+                localStorage.setItem('courtAssignments', JSON.stringify(courtAssignments));
+                loadManageAssignments();
             }
         }
 
         // Judge Portal Functions
-        function loadCourtRoomOptions() {
-            const courtRoomSelect = document.getElementById('judgeCourtRoom');
-            courtRoomSelect.innerHTML = '<option value="">Select court room</option>';
-
-            const courtRooms = new Set();
-            Object.values(courtAssignments).forEach(assignment => {
-                courtRooms.add(`${assignment.round}_${assignment.courtRoom}`);
-            });
-
-            Array.from(courtRooms).sort().forEach(courtRoomKey => {
-                const [round, courtRoom] = courtRoomKey.split('_');
-                courtRoomSelect.innerHTML += `<option value="${courtRoomKey}">${round} - Court Room ${courtRoom}</option>`;
+        function loadJudgeCompetitions() {
+            const select = document.getElementById('judge-competition');
+            select.innerHTML = '<option value="">Select Competition</option>';
+            
+            competitions.forEach(comp => {
+                const option = document.createElement('option');
+                option.value = comp.id;
+                option.textContent = comp.competitionName;
+                select.appendChild(option);
             });
         }
 
-        function loadJudgeOptions() {
-            const courtRoomKey = document.getElementById('judgeCourtRoom').value;
-            const judgeSelect = document.getElementById('judgeNameSelect');
-
-            judgeSelect.innerHTML = '<option value="">Select your name</option>';
-
-            if (!courtRoomKey) {
-                document.getElementById('assignmentDetails').classList.add('hidden');
-                return;
+        document.getElementById('judge-competition').addEventListener('change', function() {
+            const competitionId = this.value;
+            const courtroomSelect = document.getElementById('judge-courtroom');
+            courtroomSelect.innerHTML = '<option value="">Select Court Room</option>';
+            
+            if (competitionId) {
+                const assignments = courtAssignments.filter(a => a.competitionId == competitionId);
+                assignments.forEach(assignment => {
+                    const option = document.createElement('option');
+                    option.value = assignment.courtNumber;
+                    option.textContent = assignment.courtNumber;
+                    courtroomSelect.appendChild(option);
+                });
             }
+        });
 
-            // Find the assignment for this court room
-            const assignment = Object.values(courtAssignments).find(a =>
-                `${a.round}_${a.courtRoom}` === courtRoomKey
+        document.getElementById('judge-courtroom').addEventListener('change', function() {
+            const competitionId = document.getElementById('judge-competition').value;
+            const courtNumber = this.value;
+            const judgeSelect = document.getElementById('judge-name');
+            judgeSelect.innerHTML = '<option value="">Select Judge</option>';
+            
+            if (competitionId && courtNumber) {
+                const assignment = courtAssignments.find(a => 
+                    a.competitionId == competitionId && a.courtNumber === courtNumber
+                );
+                if (assignment) {
+                    assignment.judges.forEach(judge => {
+                        const option = document.createElement('option');
+                        option.value = judge.title + ' ' + judge.name;
+                        option.textContent = judge.title + ' ' + judge.name;
+                        judgeSelect.appendChild(option);
+                    });
+                }
+            }
+        });
+
+        document.getElementById('judge-login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const competitionId = document.getElementById('judge-competition').value;
+            const courtNumber = document.getElementById('judge-courtroom').value;
+            const judgeName = document.getElementById('judge-name').value;
+            
+            const assignment = courtAssignments.find(a => 
+                a.competitionId == competitionId && a.courtNumber === courtNumber
             );
-
+            
             if (assignment) {
-                assignment.judges.forEach(judge => {
-                    judgeSelect.innerHTML += `<option value="${judge}">${judge}</option>`;
-                });
+                currentJudgeSession = {
+                    competitionId,
+                    courtNumber,
+                    judgeName,
+                    assignment
+                };
+                
+                document.getElementById('judge-login').classList.add('hidden');
+                document.getElementById('score-sheet').classList.remove('hidden');
+                
+                // Reset scoring state
+                currentTeam = '';
+                document.getElementById('petitioner-btn').classList.remove('hidden');
+                document.getElementById('respondent-btn').classList.add('hidden');
             }
-        }
+        });
 
-        function showAssignmentDetails() {
-            const courtRoomKey = document.getElementById('judgeCourtRoom').value;
-            const judgeName = document.getElementById('judgeNameSelect').value;
-
-            if (!courtRoomKey || !judgeName) {
-                document.getElementById('assignmentDetails').classList.add('hidden');
-                return;
-            }
-
-            // Find the assignment
-            const assignment = Object.values(courtAssignments).find(a =>
-                `${a.round}_${a.courtRoom}` === courtRoomKey
-            );
-
-            if (!assignment) {
-                alert('Assignment not found.');
-                return;
-            }
-
-            // Check if judge is assigned to this court
-            if (!assignment.judges.includes(judgeName)) {
-                alert('You are not assigned to this court room.');
-                return;
-            }
-
-            // Store current assignment
-            currentAssignment = {
-                ...assignment,
-                currentJudge: judgeName
-            };
-
-            // Check scoring status
-            const petitionerKey = `${assignment.round}_${assignment.courtRoom}_${assignment.petitionerCode}_${judgeName}`;
-            const respondentKey = `${assignment.round}_${assignment.courtRoom}_${assignment.respondentCode}_${judgeName}`;
-
-            const petitionerDone = allScores[petitionerKey] ? '✅ Completed' : '⏳ Pending';
-            const respondentDone = allScores[respondentKey] ? '✅ Completed' : '⏳ Pending';
-
-            const detailsHTML = `
-                <div class="bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl p-6 fade-in">
-                    <h3 class="text-xl font-bold text-blue-800 mb-4">Your Assignment Details</h3>
-                    
-                    <div class="grid md:grid-cols-2 gap-6 mb-6">
-                        <div class="bg-white rounded-lg p-4">
-                            <h4 class="font-semibold text-gray-800 mb-2">Court Information</h4>
-                            <p class="text-sm text-gray-600"><strong>Round:</strong> ${assignment.round}</p>
-                            <p class="text-sm text-gray-600"><strong>Court Room:</strong> ${assignment.courtRoom}</p>
-                            <p class="text-sm text-gray-600"><strong>Your Role:</strong> Judge</p>
-                        </div>
-                        
-                        <div class="bg-white rounded-lg p-4">
-                            <h4 class="font-semibold text-gray-800 mb-2">Teams</h4>
-                            <p class="text-sm text-gray-600"><strong>Petitioner:</strong> ${assignment.petitionerCode}</p>
-                            <p class="text-sm text-gray-600"><strong>Respondent:</strong> ${assignment.respondentCode}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-white rounded-lg p-4 mb-6">
-                        <h4 class="font-semibold text-gray-800 mb-3">Scoring Status</h4>
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
-                                <span class="text-sm font-medium">Petitioner (${assignment.petitionerCode})</span>
-                                <span class="text-sm ${allScores[petitionerKey] ? 'text-green-600' : 'text-orange-600'}">${petitionerDone}</span>
-                            </div>
-                            <div class="flex justify-between items-center p-3 bg-gray-50 rounded">
-                                <span class="text-sm font-medium">Respondent (${assignment.respondentCode})</span>
-                                <span class="text-sm ${allScores[respondentKey] ? 'text-green-600' : 'text-orange-600'}">${respondentDone}</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="text-center">
-                        <button onclick="proceedToScoring()" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
-                            Proceed to Scoring Interface
-                        </button>
-                    </div>
-                </div>
-            `;
-
-            document.getElementById('assignmentDetails').innerHTML = detailsHTML;
-            document.getElementById('assignmentDetails').classList.remove('hidden');
-        }
-
-        function proceedToScoring() {
-            hideAllScreens();
-            document.getElementById('scoringScreen').classList.remove('hidden');
-
-            document.getElementById('scoringInfo').textContent =
-                `${currentAssignment.round} - Court Room ${currentAssignment.courtRoom} - Judge: ${currentAssignment.currentJudge}`;
-
-            showTeamScoring('petitioner');
-        }
-
-        // Scoring Functions (same as before but using currentAssignment)
-        function showTeamScoring(team) {
+        function selectTeam(team) {
             currentTeam = team;
-
-            // Update tab styling
-            document.getElementById('petitionerTab').className = team === 'petitioner' ?
-                'px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold' :
-                'px-6 py-3 bg-gray-300 text-gray-700 rounded-lg font-semibold';
-
-            document.getElementById('respondentTab').className = team === 'respondent' ?
-                'px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold' :
-                'px-6 py-3 bg-gray-300 text-gray-700 rounded-lg font-semibold';
-
-            generateScoringForm(team);
-        }
-
-        function generateScoringForm(team) {
-            const teamCode = team === 'petitioner' ? currentAssignment.petitionerCode : currentAssignment.respondentCode;
-            const container = document.getElementById('teamScoringContainer');
-            const currentJudge = currentAssignment.currentJudge;
-            const scoreKey = `${currentAssignment.round}_${currentAssignment.courtRoom}_${teamCode}_${currentJudge}`;
-
-            // Check if already submitted
-            const isSubmitted = allScores[scoreKey] !== undefined;
-
-            const criteria = [
-                { name: 'Perusal of Facts', max: 10 },
-                { name: 'Knowledge & Application of Law', max: 10 },
-                { name: 'Organization & Presentation of Arguments', max: 10 },
-                { name: 'Clarity of Thought, Logical Reasoning & Analytical Deduction', max: 20 },
-                { name: 'Persuasiveness & Response to the Question', max: 20 },
-                { name: 'Team Coordination & Time Management', max: 10 },
-                { name: 'Courtroom Etiquette', max: 10 }
-            ];
-
-            let formHTML = `
-                <div class="slide-in">
-                    <div class="bg-blue-50 rounded-xl p-4 mb-6">
-                        <h3 class="text-xl font-bold text-gray-800 mb-2">${team.charAt(0).toUpperCase() + team.slice(1)} Team: ${teamCode}</h3>
-                        <p class="text-sm text-gray-600">Judge: ${currentJudge} | Court Room: ${currentAssignment.courtRoom} | Round: ${currentAssignment.round}</p>
-                        ${isSubmitted ? '<p class="text-sm font-semibold text-green-600 mt-2">✅ SUBMITTED - Scores cannot be changed</p>' : ''}
-                    </div>
-                    
-                    <div class="bg-gray-50 rounded-xl p-6 mb-6">
-                        <h4 class="text-lg font-semibold text-gray-800 mb-4">Judging Criteria & Marking Scale</h4>
-                        <div class="grid md:grid-cols-2 gap-4 text-sm">
-                            <div>
-                                <p class="font-medium mb-2">Criteria (Total: 200 marks per team)</p>
-                                <ul class="space-y-1 text-gray-600">
-                                    <li>• Perusal of Facts - 10 marks</li>
-                                    <li>• Knowledge & Application of Law - 10 marks</li>
-                                    <li>• Organization & Presentation - 10 marks</li>
-                                    <li>• Clarity & Logical Reasoning - 20 marks</li>
-                                    <li>• Persuasiveness & Response - 20 marks</li>
-                                    <li>• Team Coordination & Time - 10 marks</li>
-                                    <li>• Courtroom Etiquette - 10 marks</li>
-                                </ul>
-                            </div>
-                            <div>
-                                <p class="font-medium mb-2">Marking Scale</p>
-                                <ul class="space-y-1 text-gray-600">
-                                    <li>• 1-3: Poor</li>
-                                    <li>• 4-5: Average</li>
-                                    <li>• 6-7: Good</li>
-                                    <li>• 8-9: Excellent</li>
-                                    <li>• 10: Outstanding (for 10-mark criteria)</li>
-                                    <li>• 15-19: Excellent (for 20-mark criteria)</li>
-                                    <li>• 20: Outstanding (for 20-mark criteria)</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    <form id="${team}ScoringForm" class="space-y-8">
-            `;
-
-            // Generate scoring forms for each speaker
-            for (let speaker = 1; speaker <= 2; speaker++) {
-                formHTML += `
-                    <div class="bg-white border-2 border-gray-200 rounded-xl p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h4 class="text-lg font-semibold text-gray-800">Speaker ${speaker}</h4>
-                            <div class="flex space-x-4">
-                                <label class="flex items-center">
-                                    <input type="radio" name="${team}_speaker${speaker}_gender" value="male" class="mr-2" ${isSubmitted ? 'disabled' : ''}>
-                                    <span class="text-sm font-medium text-gray-700">Male</span>
-                                </label>
-                                <label class="flex items-center">
-                                    <input type="radio" name="${team}_speaker${speaker}_gender" value="female" class="mr-2" ${isSubmitted ? 'disabled' : ''}>
-                                    <span class="text-sm font-medium text-gray-700">Female</span>
-                                </label>
-                            </div>
-                        </div>
-                        <div class="grid md:grid-cols-2 gap-6">
-                `;
-
-                criteria.forEach((criterion, index) => {
-                    formHTML += `
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                ${criterion.name} (Max: ${criterion.max})
-                            </label>
-                            <input type="number" 
-                                   id="${team}_speaker${speaker}_criterion${index}" 
-                                   min="0" 
-                                   max="${criterion.max}" 
-                                   class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isSubmitted ? 'bg-gray-100 cursor-not-allowed' : ''}" 
-                                   placeholder="0-${criterion.max}"
-                                   ${isSubmitted ? 'disabled readonly' : ''}>
-                        </div>
-                    `;
-                });
-
-                formHTML += `
-                        </div>
-                        <div class="mt-4 p-4 bg-gray-50 rounded-lg">
-                            <p class="text-sm font-medium text-gray-700">Speaker ${speaker} Total: <span id="${team}_speaker${speaker}_total" class="font-bold text-blue-600">0</span>/100</p>
-                        </div>
-                    </div>
-                `;
-            }
-
-            formHTML += `
-                        <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-xl p-6">
-                            <p class="text-lg font-bold text-green-800">Team Total: <span id="${team}_team_total" class="text-2xl">0</span>/200</p>
-                        </div>
-                        
-                        ${isSubmitted ?
-                    `<div class="w-full bg-green-100 border-2 border-green-300 text-green-800 font-semibold py-4 px-6 rounded-xl text-center">
-                                ✅ ${team.charAt(0).toUpperCase() + team.slice(1)} Scores Already Submitted
-                            </div>` :
-                    `<button type="submit" class="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
-                                Submit ${team.charAt(0).toUpperCase() + team.slice(1)} Scores
-                            </button>`
-                }
-                    </form>
-                </div>
-            `;
-
-            container.innerHTML = formHTML;
-
-            // Load existing scores if submitted
-            if (isSubmitted) {
-                const existingScore = allScores[scoreKey];
-                existingScore.speakers.forEach((speaker, speakerIndex) => {
-                    // Set gender
-                    const genderRadio = document.querySelector(`input[name="${team}_speaker${speakerIndex + 1}_gender"][value="${speaker.gender}"]`);
-                    if (genderRadio) genderRadio.checked = true;
-
-                    // Set scores
-                    speaker.scores.forEach((score, criterionIndex) => {
-                        const input = document.getElementById(`${team}_speaker${speakerIndex + 1}_criterion${criterionIndex}`);
-                        if (input) input.value = score;
-                    });
-                });
-                calculateTotals(team);
-            }
-
-            // Add event listeners for real-time calculation (only if not submitted)
-            if (!isSubmitted) {
-                const form = document.getElementById(`${team}ScoringForm`);
-                const inputs = form.querySelectorAll('input[type="number"]');
-                inputs.forEach(input => {
-                    input.addEventListener('input', () => {
-                        calculateTotals(team);
-                        // Remove error styling when user starts typing
-                        input.classList.remove('border-red-500', 'bg-red-50');
-                    });
-                });
-
-                // Add gender radio listeners
-                const genderRadios = form.querySelectorAll('input[type="radio"]');
-                genderRadios.forEach(radio => {
-                    radio.addEventListener('change', () => {
-                        // Remove error styling when gender is selected
-                        const speakerSection = radio.closest('.bg-white');
-                        if (speakerSection) {
-                            const genderContainer = speakerSection.querySelector('.flex.space-x-4');
-                            if (genderContainer) {
-                                genderContainer.classList.remove('border-2', 'border-red-500', 'bg-red-50', 'rounded-lg', 'p-2');
-                            }
-                        }
-                    });
-                });
-
-                // Add form submission handler
-                form.addEventListener('submit', function (e) {
-                    e.preventDefault();
-                    console.log('Form submitted for team:', team);
-
-                    // Clear any previous error styling
-                    clearErrorStyling(team);
-
-                    const result = submitTeamScores(team);
-                    console.log('Submission result:', result);
-                });
-            }
-        }
-
-        function calculateTotals(team) {
-            let teamTotal = 0;
-
-            for (let speaker = 1; speaker <= 2; speaker++) {
-                let speakerTotal = 0;
-
-                for (let criterion = 0; criterion < 7; criterion++) {
-                    const input = document.getElementById(`${team}_speaker${speaker}_criterion${criterion}`);
-                    const value = parseInt(input.value) || 0;
-                    speakerTotal += value;
-                }
-
-                document.getElementById(`${team}_speaker${speaker}_total`).textContent = speakerTotal;
-                teamTotal += speakerTotal;
-            }
-
-            document.getElementById(`${team}_team_total`).textContent = teamTotal;
-        }
-
-        function clearErrorStyling(team) {
-            // Clear input field error styling
-            const inputs = document.querySelectorAll(`#${team}ScoringForm input[type="number"]`);
-            inputs.forEach(input => {
-                input.classList.remove('border-red-500', 'bg-red-50');
+            document.getElementById('current-team').textContent = 
+                team === 'petitioner' ? 'Scoring Petitioner Team' : 'Scoring Respondent Team';
+            document.getElementById('scoring-form').classList.remove('hidden');
+            document.getElementById('team-selection').classList.add('hidden');
+            
+            // Clear previous scores
+            document.querySelectorAll('#scoring-form input[type="number"]').forEach(input => {
+                input.value = '';
             });
-
-            // Clear gender radio error styling
-            const genderContainers = document.querySelectorAll(`#${team}ScoringForm .flex.space-x-4`);
-            genderContainers.forEach(container => {
-                container.classList.remove('border-2', 'border-red-500', 'bg-red-50', 'rounded-lg', 'p-2');
+            document.querySelectorAll('#scoring-form select').forEach(select => {
+                select.value = '';
             });
         }
 
-        function highlightErrors(team, validationErrors) {
-            validationErrors.forEach(error => {
-                if (error.includes('gender')) {
-                    // Extract speaker number from error message
-                    const speakerMatch = error.match(/Speaker (\d+)/);
-                    if (speakerMatch) {
-                        const speakerNum = speakerMatch[1];
-                        const genderContainer = document.querySelector(`#${team}ScoringForm input[name="${team}_speaker${speakerNum}_gender"]`)?.closest('.flex.space-x-4');
-                        if (genderContainer) {
-                            genderContainer.classList.add('border-2', 'border-red-500', 'bg-red-50', 'rounded-lg', 'p-2');
-                        }
-                    }
-                } else if (error.includes('criterion') || error.includes('score')) {
-                    // Extract speaker and criterion from error message
-                    const speakerMatch = error.match(/Speaker (\d+)/);
-                    const criterionMatch = error.match(/criterion (\d+)/);
-                    if (speakerMatch && criterionMatch) {
-                        const speakerNum = speakerMatch[1];
-                        const criterionNum = parseInt(criterionMatch[1]) - 1; // Convert to 0-based index
-                        const input = document.getElementById(`${team}_speaker${speakerNum}_criterion${criterionNum}`);
-                        if (input) {
-                            input.classList.add('border-red-500', 'bg-red-50');
-                        }
-                    }
-                }
-            });
-        }
-
-        function submitTeamScores(team) {
-            const teamCode = team === 'petitioner' ? currentAssignment.petitionerCode : currentAssignment.respondentCode;
-            const currentJudge = currentAssignment.currentJudge;
-            const scoreKey = `${currentAssignment.round}_${currentAssignment.courtRoom}_${teamCode}_${currentJudge}`;
-
-            console.log('=== SUBMISSION DEBUG ===');
-            console.log('Team:', team);
-            console.log('Team Code:', teamCode);
-            console.log('Current Judge:', currentJudge);
-            console.log('Score Key:', scoreKey);
-            console.log('Current Assignment:', currentAssignment);
-
-            // Check if already submitted
-            if (allScores[scoreKey]) {
-                alert(`❌ You have already submitted scores for ${team} team.\n\nScores cannot be changed once submitted.`);
-                return false;
-            }
-
+        function submitTeamScore() {
             // Validate all fields are filled
-            let validationErrors = [];
-            let debugInfo = [];
-
-            for (let speaker = 1; speaker <= 2; speaker++) {
-                debugInfo.push(`\n--- Speaker ${speaker} ---`);
-
-                // Check gender selection
-                const genderRadios = document.querySelectorAll(`input[name="${team}_speaker${speaker}_gender"]`);
-                debugInfo.push(`Gender radios found: ${genderRadios.length}`);
-
-                const genderSelected = Array.from(genderRadios).some(radio => {
-                    debugInfo.push(`Radio ${radio.value}: ${radio.checked}`);
-                    return radio.checked;
-                });
-
-                if (!genderSelected) {
-                    validationErrors.push(`❌ Speaker ${speaker}: Please select gender (Male/Female)`);
+            const requiredFields = document.querySelectorAll('#scoring-form [required]');
+            let allFilled = true;
+            
+            requiredFields.forEach(field => {
+                if (!field.value) {
+                    allFilled = false;
+                    field.classList.add('border-red-500');
+                } else {
+                    field.classList.remove('border-red-500');
                 }
-
-                // Check all criterion scores
-                for (let criterion = 0; criterion < 7; criterion++) {
-                    const inputId = `${team}_speaker${speaker}_criterion${criterion}`;
-                    const input = document.getElementById(inputId);
-
-                    debugInfo.push(`Input ${inputId}: ${input ? 'found' : 'NOT FOUND'}`);
-
-                    if (!input) {
-                        validationErrors.push(`❌ System Error: Missing input field for Speaker ${speaker}, Criterion ${criterion + 1}`);
-                        continue;
-                    }
-
-                    const value = input.value.trim();
-                    debugInfo.push(`Input ${inputId} value: "${value}"`);
-
-                    if (value === '' || value === null || value === undefined) {
-                        const criteriaNames = [
-                            'Perusal of Facts',
-                            'Knowledge & Application of Law',
-                            'Organization & Presentation',
-                            'Clarity & Logical Reasoning',
-                            'Persuasiveness & Response',
-                            'Team Coordination & Time',
-                            'Courtroom Etiquette'
-                        ];
-                        validationErrors.push(`❌ Speaker ${speaker}: Please enter score for "${criteriaNames[criterion]}"`);
-                    } else if (isNaN(parseInt(value))) {
-                        validationErrors.push(`❌ Speaker ${speaker}: Score must be a number for criterion ${criterion + 1}`);
-                    } else {
-                        const numValue = parseInt(value);
-                        const maxScore = (criterion === 3 || criterion === 4) ? 20 : 10;
-                        if (numValue < 0 || numValue > maxScore) {
-                            validationErrors.push(`❌ Speaker ${speaker}: Score must be between 0-${maxScore} for criterion ${criterion + 1} (entered: ${numValue})`);
-                        }
-                    }
-                }
+            });
+            
+            if (!allFilled) {
+                alert('Please fill all required fields including speaker genders.');
+                return;
             }
 
-            console.log('Debug Info:', debugInfo.join('\n'));
-            console.log('Validation Errors:', validationErrors);
-
-            if (validationErrors.length > 0) {
-                // Highlight error fields
-                highlightErrors(team, validationErrors);
-
-                const errorMessage = `⚠️ VALIDATION ERRORS\n\nPlease fix these issues before submitting:\n\n${validationErrors.join('\n')}\n\n📝 Make sure all fields are filled and scores are within the correct range.\n\n🔍 Error fields are highlighted in red.`;
-                alert(errorMessage);
-
-                // Scroll to first error field
-                const firstErrorInput = document.querySelector(`#${team}ScoringForm input.border-red-500`);
-                const firstErrorRadio = document.querySelector(`#${team}ScoringForm .flex.border-red-500`);
-                const firstError = firstErrorInput || firstErrorRadio;
-
-                if (firstError) {
-                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    if (firstErrorInput) {
-                        firstErrorInput.focus();
-                    }
-                }
-
-                return false;
-            }
-
-            // Create team scores object
-            const teamScores = {
-                team: teamCode,
-                round: currentAssignment.round,
-                courtRoom: currentAssignment.courtRoom,
-                judge: currentJudge,
-                allJudges: currentAssignment.judges,
-                timestamp: new Date().toISOString(),
-                speakers: []
+            // Collect scores
+            const scores = {
+                judgeSession: currentJudgeSession,
+                team: currentTeam,
+                teamCode: currentTeam === 'petitioner' ? 
+                    currentJudgeSession.assignment.petitionerCode : 
+                    currentJudgeSession.assignment.respondentCode,
+                speaker1: {
+                    gender: document.getElementById('speaker1-gender').value,
+                    perusal: parseInt(document.getElementById('s1-perusal').value),
+                    knowledge: parseInt(document.getElementById('s1-knowledge').value),
+                    organization: parseInt(document.getElementById('s1-organization').value),
+                    clarity: parseInt(document.getElementById('s1-clarity').value),
+                    persuasiveness: parseInt(document.getElementById('s1-persuasiveness').value),
+                    coordination: parseInt(document.getElementById('s1-coordination').value),
+                    etiquette: parseInt(document.getElementById('s1-etiquette').value)
+                },
+                speaker2: {
+                    gender: document.getElementById('speaker2-gender').value,
+                    perusal: parseInt(document.getElementById('s2-perusal').value),
+                    knowledge: parseInt(document.getElementById('s2-knowledge').value),
+                    organization: parseInt(document.getElementById('s2-organization').value),
+                    clarity: parseInt(document.getElementById('s2-clarity').value),
+                    persuasiveness: parseInt(document.getElementById('s2-persuasiveness').value),
+                    coordination: parseInt(document.getElementById('s2-coordination').value),
+                    etiquette: parseInt(document.getElementById('s2-etiquette').value)
+                },
+                timestamp: new Date().toISOString()
             };
 
-            let teamTotal = 0;
+            // Calculate totals
+            scores.speaker1.total = Object.values(scores.speaker1).reduce((sum, val) => 
+                typeof val === 'number' ? sum + val : sum, 0);
+            scores.speaker2.total = Object.values(scores.speaker2).reduce((sum, val) => 
+                typeof val === 'number' ? sum + val : sum, 0);
+            scores.teamTotal = scores.speaker1.total + scores.speaker2.total;
 
-            for (let speaker = 1; speaker <= 2; speaker++) {
-                const speakerScores = [];
-                let speakerTotal = 0;
+            judgeScores.push(scores);
+            localStorage.setItem('judgeScores', JSON.stringify(judgeScores));
 
-                // Get gender
-                const genderRadios = document.querySelectorAll(`input[name="${team}_speaker${speaker}_gender"]`);
-                const gender = Array.from(genderRadios).find(radio => radio.checked)?.value;
-
-                for (let criterion = 0; criterion < 7; criterion++) {
-                    const input = document.getElementById(`${team}_speaker${speaker}_criterion${criterion}`);
-                    const value = parseInt(input.value) || 0;
-                    speakerScores.push(value);
-                    speakerTotal += value;
-                }
-
-                teamScores.speakers.push({
-                    speaker: speaker,
-                    gender: gender,
-                    scores: speakerScores,
-                    total: speakerTotal
-                });
-
-                teamTotal += speakerTotal;
+            // Move to next team or finish
+            if (currentTeam === 'petitioner') {
+                document.getElementById('petitioner-btn').classList.add('hidden');
+                document.getElementById('respondent-btn').classList.remove('hidden');
+                document.getElementById('scoring-form').classList.add('hidden');
+                document.getElementById('team-selection').classList.remove('hidden');
+                alert('Petitioner scores submitted! Please score the Respondent team.');
+            } else {
+                // Both teams scored, show thank you
+                document.getElementById('scoring-section').classList.add('hidden');
+                document.getElementById('thank-you-card').classList.remove('hidden');
             }
+        }
 
-            teamScores.total = teamTotal;
+        function resetJudgePortal() {
+            document.getElementById('judge-login').classList.remove('hidden');
+            document.getElementById('score-sheet').classList.add('hidden');
+            document.getElementById('thank-you-card').classList.add('hidden');
+            document.getElementById('scoring-section').classList.remove('hidden');
+            document.getElementById('judge-login-form').reset();
+            currentJudgeSession = null;
+        }
 
-            try {
-                // Save to localStorage
-                allScores[scoreKey] = teamScores;
-                localStorage.setItem('mcjsScores', JSON.stringify(allScores));
+        // Court Manager Portal Functions
+        function loadManagerData() {
+            const select = document.getElementById('manager-name-select');
+            select.innerHTML = '<option value="">Select Manager</option>';
+            
+            courtAssignments.forEach(assignment => {
+                const option = document.createElement('option');
+                option.value = assignment.managerName;
+                option.textContent = assignment.managerName;
+                option.dataset.assignmentId = assignment.id;
+                select.appendChild(option);
+            });
+        }
 
-                console.log('Scores saved successfully:', teamScores);
-
-                // Show success message with detailed breakdown
-                const successMessage = `✅ ${team.charAt(0).toUpperCase() + team.slice(1)} scores submitted successfully!
-
-📊 SCORE BREAKDOWN:
-• Speaker 1 (${teamScores.speakers[0].gender}): ${teamScores.speakers[0].total}/100
-• Speaker 2 (${teamScores.speakers[1].gender}): ${teamScores.speakers[1].total}/100
-• Team Total: ${teamTotal}/200
-
-${team === 'petitioner' ? '➡️ Moving to Respondent scoring...' : '🎉 All scoring complete!'}`;
-
-                alert(successMessage);
-
-                // Refresh the current team view to show submitted state
-                generateScoringForm(team);
-
-                // Auto-switch to respondent after petitioner submission
-                if (team === 'petitioner') {
-                    setTimeout(() => {
-                        showTeamScoring('respondent');
-                    }, 1500);
-                } else {
-                    // Both teams completed - check if both are submitted
-                    const petitionerKey = `${currentAssignment.round}_${currentAssignment.courtRoom}_${currentAssignment.petitionerCode}_${currentJudge}`;
-                    const respondentKey = `${currentAssignment.round}_${currentAssignment.courtRoom}_${currentAssignment.respondentCode}_${currentJudge}`;
-
-                    if (allScores[petitionerKey] && allScores[respondentKey]) {
-                        setTimeout(() => {
-                            showThankYouCertificate();
-                        }, 2000);
+        document.getElementById('manager-name-select').addEventListener('change', function() {
+            const assignmentId = this.selectedOptions[0]?.dataset.assignmentId;
+            const roundSelect = document.getElementById('manager-round');
+            roundSelect.innerHTML = '<option value="">Select Round</option>';
+            
+            if (assignmentId) {
+                const assignment = courtAssignments.find(a => a.id == assignmentId);
+                if (assignment) {
+                    const competition = competitions.find(c => c.id == assignment.competitionId);
+                    if (competition) {
+                        competition.rounds.forEach(round => {
+                            const option = document.createElement('option');
+                            option.value = round;
+                            option.textContent = round.charAt(0).toUpperCase() + round.slice(1);
+                            roundSelect.appendChild(option);
+                        });
                     }
                 }
-
-                return true;
-
-            } catch (error) {
-                console.error('Error saving scores:', error);
-                alert('❌ Error saving scores. Please try again.\n\nError details: ' + error.message);
-                return false;
             }
-        }
+        });
 
-        // Host Dashboard Functions (same as before)
-        function loadHostDashboard() {
-            showDashboardTab('prelims');
-        }
-
-        function showDashboardTab(tab) {
-            // Update tab styling
-            const tabs = ['prelimsTab', 'knockoutsTab', 'statisticsTab'];
-            tabs.forEach(tabId => {
-                const element = document.getElementById(tabId);
-                if (tabId === tab + 'Tab') {
-                    element.className = 'px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold';
-                } else {
-                    element.className = 'px-6 py-3 bg-gray-300 text-gray-700 rounded-lg font-semibold';
-                }
-            });
-
-            const content = document.getElementById('dashboardContent');
-
-            if (Object.keys(allScores).length === 0) {
-                content.innerHTML = '<p class="text-gray-500 text-center py-8">No scores available yet.</p>';
-                return;
-            }
-
-            switch (tab) {
-                case 'prelims':
-                    loadPrelimsRankings();
-                    break;
-                case 'knockouts':
-                    loadKnockoutRounds();
-                    break;
-                case 'statistics':
-                    loadStatistics();
-                    break;
-            }
-        }
-
-        function loadPrelimsRankings() {
-            const prelimsScores = Object.values(allScores).filter(score =>
-                score.round === 'PRELIMS 1' || score.round === 'PRELIMS 2'
+        document.getElementById('manager-login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const managerName = document.getElementById('manager-name-select').value;
+            const password = document.getElementById('manager-login-password').value;
+            const round = document.getElementById('manager-round').value;
+            
+            const assignment = courtAssignments.find(a => 
+                a.managerName === managerName && a.managerPassword === password
             );
-
-            if (prelimsScores.length === 0) {
-                document.getElementById('dashboardContent').innerHTML =
-                    '<p class="text-gray-500 text-center py-8">No prelims scores available yet.</p>';
-                return;
+            
+            if (assignment) {
+                currentManagerSession = {
+                    assignment,
+                    round,
+                    managerName
+                };
+                
+                document.getElementById('manager-login').classList.add('hidden');
+                document.getElementById('time-keeping').classList.remove('hidden');
+                
+                // Set up time calculation listeners
+                setupTimeCalculation();
+            } else {
+                alert('Invalid credentials!');
             }
+        });
 
-            // Calculate team averages across all prelims rounds
-            const teamStats = {};
-
-            prelimsScores.forEach(score => {
-                if (!teamStats[score.team]) {
-                    teamStats[score.team] = {
-                        team: score.team,
-                        scores: [],
-                        rounds: new Set()
-                    };
-                }
-                teamStats[score.team].scores.push(score.total);
-                teamStats[score.team].rounds.add(score.round);
-            });
-
-            // Calculate averages and sort
-            const rankedTeams = Object.values(teamStats).map(team => ({
-                ...team,
-                avgScore: (team.scores.reduce((a, b) => a + b, 0) / team.scores.length).toFixed(1),
-                totalRounds: team.rounds.size
-            })).sort((a, b) => parseFloat(b.avgScore) - parseFloat(a.avgScore));
-
-            let html = `
-                <div class="bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl p-6">
-                    <h3 class="text-xl font-bold text-blue-800 mb-6">Prelims Team Rankings</h3>
-                    <div class="space-y-3">
-            `;
-
-            rankedTeams.forEach((team, index) => {
-                const rankColor = index < 3 ? 'text-yellow-600' : 'text-gray-600';
-                const bgColor = index < 3 ? 'bg-yellow-50 border-yellow-200' : 'bg-white border-gray-200';
-
-                html += `
-                    <div class="flex items-center justify-between p-4 ${bgColor} border rounded-lg cursor-pointer hover:shadow-md transition-shadow" onclick="showTeamPrintable('${team.team}')">
-                        <div class="flex items-center space-x-4">
-                            <span class="text-2xl font-bold ${rankColor}">#${index + 1}</span>
-                            <div>
-                                <p class="font-bold text-gray-800">${team.team}</p>
-                                <p class="text-sm text-gray-600">${team.totalRounds} round${team.totalRounds > 1 ? 's' : ''} completed</p>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-2xl font-bold text-blue-600">${team.avgScore}</p>
-                            <p class="text-sm text-gray-500">Average Score</p>
-                        </div>
-                    </div>
-                `;
-            });
-
-            html += `
-                    </div>
-                </div>
-            `;
-
-            document.getElementById('dashboardContent').innerHTML = html;
-        }
-
-        function loadKnockoutRounds() {
-            const knockoutRounds = ['OCTAS', 'QUARTERS', 'SEMI', 'FINALS'];
-            const knockoutScores = Object.values(allScores).filter(score =>
-                knockoutRounds.includes(score.round)
-            );
-
-            if (knockoutScores.length === 0) {
-                document.getElementById('dashboardContent').innerHTML =
-                    '<p class="text-gray-500 text-center py-8">No knockout round scores available yet.</p>';
-                return;
-            }
-
-            // Group by round and court room
-            const roundData = {};
-            knockoutScores.forEach(score => {
-                if (!roundData[score.round]) {
-                    roundData[score.round] = {};
-                }
-                if (!roundData[score.round][score.courtRoom]) {
-                    roundData[score.round][score.courtRoom] = {
-                        teams: {},
-                        judges: new Set()
-                    };
-                }
-
-                roundData[score.round][score.courtRoom].judges.add(score.judge);
-
-                if (!roundData[score.round][score.courtRoom].teams[score.team]) {
-                    roundData[score.round][score.courtRoom].teams[score.team] = [];
-                }
-                roundData[score.round][score.courtRoom].teams[score.team].push(score.total);
-            });
-
-            let html = '<div class="space-y-6">';
-
-            knockoutRounds.forEach(round => {
-                if (roundData[round]) {
-                    html += `
-                        <div class="bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl p-6">
-                            <h3 class="text-xl font-bold text-purple-800 mb-4">${round}</h3>
-                            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    `;
-
-                    Object.entries(roundData[round]).forEach(([courtRoom, courtData]) => {
-                        const judgesList = Array.from(courtData.judges).join(', ');
-
-                        // Calculate team averages and find winner
-                        const teamAverages = Object.entries(courtData.teams).map(([team, scores]) => ({
-                            team,
-                            avgScore: (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1)
-                        })).sort((a, b) => parseFloat(b.avgScore) - parseFloat(a.avgScore));
-
-                        const winner = teamAverages[0];
-
-                        html += `
-                            <div class="bg-white rounded-lg p-4 shadow-sm border">
-                                <div class="flex justify-between items-center mb-3">
-                                    <h4 class="font-bold text-gray-800">Court Room ${courtRoom}</h4>
-                                    <button onclick="printCourtRoom('${round}', '${courtRoom}')" class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs">
-                                        🖨️
-                                    </button>
-                                </div>
-                                <p class="text-xs text-gray-500 mb-3">Judges: ${judgesList}</p>
-                                
-                                <div class="space-y-2">
-                        `;
-
-                        teamAverages.forEach((team, index) => {
-                            const isWinner = index === 0;
-                            const bgColor = isWinner ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200';
-                            const textColor = isWinner ? 'text-green-800' : 'text-gray-700';
-
-                            html += `
-                                <div class="flex justify-between items-center p-2 ${bgColor} border rounded cursor-pointer hover:shadow-sm" onclick="showTeamPrintable('${team.team}')">
-                                    <span class="font-medium ${textColor}">
-                                        ${isWinner ? '🏆 ' : ''}${team.team}
-                                    </span>
-                                    <span class="font-bold text-blue-600">${team.avgScore}</span>
-                                </div>
-                            `;
-                        });
-
-                        html += `
-                                </div>
-                            </div>
-                        `;
-                    });
-
-                    html += `
-                            </div>
-                        </div>
-                    `;
-                }
-            });
-
-            html += '</div>';
-            document.getElementById('dashboardContent').innerHTML = html;
-        }
-
-        function loadStatistics() {
-            const totalTeams = new Set(Object.values(allScores).map(s => s.team)).size;
-            const totalRounds = new Set(Object.values(allScores).map(s => s.round)).size;
-            const totalCourtRooms = new Set(Object.values(allScores).map(s => s.courtRoom)).size;
-            const totalJudges = new Set(Object.values(allScores).map(s => s.judge)).size;
-
-            // Round breakdown
-            const roundBreakdown = {};
-            Object.values(allScores).forEach(score => {
-                if (!roundBreakdown[score.round]) {
-                    roundBreakdown[score.round] = new Set();
-                }
-                roundBreakdown[score.round].add(score.team);
-            });
-
-            let html = `
-                <div class="space-y-6">
-                    <div class="bg-gradient-to-r from-green-50 to-green-100 rounded-xl p-6">
-                        <h3 class="text-xl font-bold text-green-800 mb-6">Tournament Statistics</h3>
-                        <div class="grid md:grid-cols-4 gap-6 text-center">
-                            <div class="bg-white rounded-lg p-4">
-                                <p class="text-3xl font-bold text-blue-600">${totalTeams}</p>
-                                <p class="text-sm text-gray-600">Total Teams</p>
-                            </div>
-                            <div class="bg-white rounded-lg p-4">
-                                <p class="text-3xl font-bold text-green-600">${totalRounds}</p>
-                                <p class="text-sm text-gray-600">Rounds</p>
-                            </div>
-                            <div class="bg-white rounded-lg p-4">
-                                <p class="text-3xl font-bold text-purple-600">${totalCourtRooms}</p>
-                                <p class="text-sm text-gray-600">Court Rooms</p>
-                            </div>
-                            <div class="bg-white rounded-lg p-4">
-                                <p class="text-3xl font-bold text-orange-600">${totalJudges}</p>
-                                <p class="text-sm text-gray-600">Judges</p>
-                            </div>
-                        </div>
-                    </div>
+        function setupTimeCalculation() {
+            const inputs = ['pet-s1-time', 'pet-s2-time', 'pet-rebuttal-time', 'res-s1-time', 'res-s2-time', 'res-rebuttal-time'];
+            
+            inputs.forEach(inputId => {
+                document.getElementById(inputId).addEventListener('input', function() {
+                    const prefix = inputId.startsWith('pet') ? 'pet' : 'res';
+                    const s1 = parseInt(document.getElementById(`${prefix}-s1-time`).value) || 0;
+                    const s2 = parseInt(document.getElementById(`${prefix}-s2-time`).value) || 0;
+                    const rebuttal = parseInt(document.getElementById(`${prefix}-rebuttal-time`).value) || 0;
+                    const total = s1 + s2 + rebuttal;
                     
-                    <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-6">
-                        <h3 class="text-xl font-bold text-gray-800 mb-4">Round Participation</h3>
-                        <div class="space-y-3">
-            `;
-
-            Object.entries(roundBreakdown).forEach(([round, teams]) => {
-                html += `
-                    <div class="flex justify-between items-center p-3 bg-white rounded-lg">
-                        <span class="font-medium text-gray-800">${round}</span>
-                        <span class="font-bold text-blue-600">${teams.size} teams</span>
-                    </div>
-                `;
-            });
-
-            html += `
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            document.getElementById('dashboardContent').innerHTML = html;
-        }
-
-        function showTeamPrintable(teamCode) {
-            const teamScores = Object.values(allScores).filter(s => s.team === teamCode);
-
-            if (teamScores.length === 0) {
-                alert('No scores found for this team.');
-                return;
-            }
-
-            const criteria = [
-                'Perusal of Facts',
-                'Knowledge & Application of Law',
-                'Organization & Presentation of Arguments',
-                'Clarity of Thought, Logical Reasoning & Analytical Deduction',
-                'Persuasiveness & Response to the Question',
-                'Team Coordination & Time Management',
-                'Courtroom Etiquette'
-            ];
-
-            let printContent = `
-                <html>
-                <head>
-                    <title>Team ${teamCode} - Complete Score Report</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; margin: 20px; }
-                        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 10px; }
-                        .round-section { margin-bottom: 30px; page-break-inside: avoid; }
-                        .round-header { background-color: #f0f0f0; padding: 10px; margin-bottom: 15px; }
-                        .speaker-section { margin-bottom: 20px; border: 1px solid #ddd; padding: 15px; }
-                        .criteria-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
-                        .criteria-table th, .criteria-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                        .criteria-table th { background-color: #f9f9f9; }
-                        .total-score { font-weight: bold; font-size: 1.2em; color: #2563eb; }
-                        .summary-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                        .summary-table th, .summary-table td { border: 1px solid #333; padding: 10px; text-align: center; }
-                        .summary-table th { background-color: #333; color: white; }
-                        @media print { .no-print { display: none; } }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <h1>MCJS Mark -1</h1>
-                        <h2>VKT KRISHNADAS UNNI SOUNDARYA COLLEGE OF LAW</h2>
-                        <h3>Complete Score Report - Team ${teamCode}</h3>
-                        <p>Generated on: ${new Date().toLocaleString()}</p>
-                    </div>
-            `;
-
-            // Summary table
-            printContent += `
-                <table class="summary-table">
-                    <thead>
-                        <tr>
-                            <th>Round</th>
-                            <th>Court Room</th>
-                            <th>Judge</th>
-                            <th>Total Score</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
-
-            let totalSum = 0;
-            teamScores.forEach(score => {
-                printContent += `
-                    <tr>
-                        <td>${score.round}</td>
-                        <td>${score.courtRoom}</td>
-                        <td>${score.judge}</td>
-                        <td><strong>${score.total}/200</strong></td>
-                    </tr>
-                `;
-                totalSum += score.total;
-            });
-
-            const averageScore = (totalSum / teamScores.length).toFixed(1);
-
-            printContent += `
-                    </tbody>
-                    <tfoot>
-                        <tr style="background-color: #f0f0f0;">
-                            <td colspan="3"><strong>Average Score</strong></td>
-                            <td><strong>${averageScore}/200</strong></td>
-                        </tr>
-                    </tfoot>
-                </table>
-            `;
-
-            // Detailed breakdown by round
-            teamScores.forEach(score => {
-                printContent += `
-                    <div class="round-section">
-                        <div class="round-header">
-                            <h2>${score.round} - Court Room ${score.courtRoom}</h2>
-                            <p>Judge: ${score.judge} | Total Score: <span class="total-score">${score.total}/200</span></p>
-                        </div>
-                `;
-
-                score.speakers.forEach((speaker, speakerIndex) => {
-                    const genderIcon = speaker.gender === 'male' ? '♂' : '♀';
-                    printContent += `
-                        <div class="speaker-section">
-                            <h3>${genderIcon} Speaker ${speaker.speaker} - Score: ${speaker.total}/100</h3>
-                            <table class="criteria-table">
-                                <thead>
-                                    <tr>
-                                        <th>Criteria</th>
-                                        <th>Max Score</th>
-                                        <th>Awarded Score</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                    `;
-
-                    speaker.scores.forEach((criterionScore, criterionIndex) => {
-                        const maxScore = criterionIndex === 3 || criterionIndex === 4 ? 20 : 10;
-                        printContent += `
-                            <tr>
-                                <td>${criteria[criterionIndex]}</td>
-                                <td>${maxScore}</td>
-                                <td><strong>${criterionScore}</strong></td>
-                            </tr>
-                        `;
-                    });
-
-                    printContent += `
-                                </tbody>
-                            </table>
-                        </div>
-                    `;
+                    document.getElementById(`${prefix}-total`).textContent = total;
+                    
+                    if (total > 30) {
+                        document.getElementById(`${prefix}-total`).classList.add('text-red-600');
+                    } else {
+                        document.getElementById(`${prefix}-total`).classList.remove('text-red-600');
+                    }
                 });
-
-                printContent += `</div>`;
             });
-
-            printContent += `
-                </body>
-                </html>
-            `;
-
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(printContent);
-            printWindow.document.close();
-            printWindow.print();
         }
 
-        function printCourtRoom(round, courtRoom) {
-            const relevantScores = Object.values(allScores).filter(s =>
-                s.round === round && s.courtRoom === courtRoom
-            );
-
-            if (relevantScores.length === 0) {
-                alert('No scores found for this court room.');
+        function startTimekeeping() {
+            // Validate time allocation
+            const petTotal = parseInt(document.getElementById('pet-total').textContent);
+            const resTotal = parseInt(document.getElementById('res-total').textContent);
+            
+            if (petTotal !== 30 || resTotal !== 30) {
+                alert('Each team must have exactly 30 minutes total time allocation!');
                 return;
             }
+            
+            // Set up speaker queue
+            speakerQueue = [
+                { team: 'Petitioner', speaker: 'Speaker 1', time: parseInt(document.getElementById('pet-s1-time').value) * 60 },
+                { team: 'Petitioner', speaker: 'Speaker 2', time: parseInt(document.getElementById('pet-s2-time').value) * 60 },
+                { team: 'Petitioner', speaker: 'Rebuttal', time: parseInt(document.getElementById('pet-rebuttal-time').value) * 60 },
+                { team: 'Respondent', speaker: 'Speaker 1', time: parseInt(document.getElementById('res-s1-time').value) * 60 },
+                { team: 'Respondent', speaker: 'Speaker 2', time: parseInt(document.getElementById('res-s2-time').value) * 60 },
+                { team: 'Respondent', speaker: 'Rebuttal', time: parseInt(document.getElementById('res-rebuttal-time').value) * 60 }
+            ];
+            
+            currentSpeakerIndex = 0;
+            currentTimerData = {
+                timeRemaining: speakerQueue[0].time,
+                originalTime: speakerQueue[0].time,
+                isRunning: false,
+                startTime: null,
+                speakerTimes: []
+            };
+            
+            document.getElementById('time-setup').classList.add('hidden');
+            document.getElementById('timer-display').classList.remove('hidden');
+            
+            updateCurrentSpeaker();
+            updateTimerDisplay();
+            updateProgressTracking();
+        }
 
-            // Group by team
-            const teamData = {};
-            relevantScores.forEach(score => {
-                if (!teamData[score.team]) {
-                    teamData[score.team] = [];
+        function updateCurrentSpeaker() {
+            const current = speakerQueue[currentSpeakerIndex];
+            document.getElementById('current-speaker').textContent = 
+                `${current.team} - ${current.speaker}`;
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(currentTimerData.timeRemaining / 60);
+            const seconds = Math.floor(currentTimerData.timeRemaining % 60);
+            const milliseconds = Math.floor((currentTimerData.timeRemaining % 1) * 1000);
+            
+            document.getElementById('timer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}:${milliseconds.toString().padStart(3, '0')}`;
+        }
+
+        function startTimer() {
+            if (!currentTimerData.isRunning) {
+                currentTimerData.isRunning = true;
+                currentTimerData.startTime = Date.now();
+                
+                document.getElementById('start-btn').classList.add('hidden');
+                document.getElementById('pause-btn').classList.remove('hidden');
+                document.getElementById('next-speaker-btn').classList.remove('hidden');
+                
+                timerInterval = setInterval(updateTimer, 10); // Update every 10ms for milliseconds
+            }
+        }
+
+        function pauseTimer() {
+            if (currentTimerData.isRunning) {
+                currentTimerData.isRunning = false;
+                clearInterval(timerInterval);
+                
+                document.getElementById('start-btn').classList.remove('hidden');
+                document.getElementById('pause-btn').classList.add('hidden');
+            }
+        }
+
+        function updateTimer() {
+            if (currentTimerData.isRunning) {
+                currentTimerData.timeRemaining -= 0.01; // Decrease by 10ms
+                
+                if (currentTimerData.timeRemaining <= 0) {
+                    currentTimerData.timeRemaining = 0;
+                    pauseTimer();
+                    ringBell(5000); // Long ring for 5 seconds
+                    nextSpeaker();
+                    return;
                 }
-                teamData[score.team].push(score);
+                
+                // Check for bell rings
+                const elapsed = currentTimerData.originalTime - currentTimerData.timeRemaining;
+                const halfTime = currentTimerData.originalTime / 2;
+                const lastFiveMinutes = 5 * 60;
+                
+                if (Math.abs(elapsed - halfTime) < 0.1) {
+                    ringBell(1000); // Bell at half time
+                } else if (Math.abs(currentTimerData.timeRemaining - lastFiveMinutes) < 0.1) {
+                    ringBell(1000); // Bell at last 5 minutes
+                }
+                
+                updateTimerDisplay();
+            }
+        }
+
+        function ringBell(duration) {
+            const bell = document.getElementById('bell');
+            bell.classList.add('bell-animation');
+            
+            // Play bell sound (visual indication)
+            setTimeout(() => {
+                bell.classList.remove('bell-animation');
+            }, duration);
+        }
+
+        function addExtraTime(seconds) {
+            currentTimerData.timeRemaining += seconds;
+            currentTimerData.originalTime += seconds;
+            updateTimerDisplay();
+        }
+
+        function nextSpeaker() {
+            // Record current speaker time
+            const speakerTime = {
+                team: speakerQueue[currentSpeakerIndex].team,
+                speaker: speakerQueue[currentSpeakerIndex].speaker,
+                allocatedTime: speakerQueue[currentSpeakerIndex].time,
+                actualTime: currentTimerData.originalTime - currentTimerData.timeRemaining,
+                timestamp: new Date().toISOString()
+            };
+            
+            currentTimerData.speakerTimes.push(speakerTime);
+            
+            currentSpeakerIndex++;
+            
+            if (currentSpeakerIndex >= speakerQueue.length) {
+                // All speakers done
+                pauseTimer();
+                document.getElementById('submit-timekeeping').classList.remove('hidden');
+                document.getElementById('current-speaker').textContent = 'All speakers completed';
+                document.getElementById('timer').textContent = '00:00:000';
+                document.getElementById('start-btn').classList.add('hidden');
+                document.getElementById('pause-btn').classList.add('hidden');
+                document.getElementById('next-speaker-btn').classList.add('hidden');
+            } else {
+                // Move to next speaker
+                currentTimerData.timeRemaining = speakerQueue[currentSpeakerIndex].time;
+                currentTimerData.originalTime = speakerQueue[currentSpeakerIndex].time;
+                currentTimerData.isRunning = false;
+                
+                document.getElementById('start-btn').classList.remove('hidden');
+                document.getElementById('pause-btn').classList.add('hidden');
+                
+                updateCurrentSpeaker();
+                updateTimerDisplay();
+            }
+            
+            updateProgressTracking();
+        }
+
+        function updateProgressTracking() {
+            const container = document.getElementById('progress-list');
+            container.innerHTML = '';
+            
+            currentTimerData.speakerTimes.forEach(time => {
+                const div = document.createElement('div');
+                div.className = 'text-sm text-gray-600';
+                const actualMinutes = Math.floor(time.actualTime / 60);
+                const actualSeconds = Math.floor(time.actualTime % 60);
+                div.textContent = `${time.team} ${time.speaker}: ${actualMinutes}:${actualSeconds.toString().padStart(2, '0')}`;
+                container.appendChild(div);
             });
+        }
 
-            const criteria = [
-                'Perusal of Facts',
-                'Knowledge & Application of Law',
-                'Organization & Presentation of Arguments',
-                'Clarity of Thought, Logical Reasoning & Analytical Deduction',
-                'Persuasiveness & Response to the Question',
-                'Team Coordination & Time Management',
-                'Courtroom Etiquette'
-            ];
+        function submitTimekeeping() {
+            const timekeepingRecord = {
+                id: Date.now(),
+                managerSession: currentManagerSession,
+                speakerTimes: currentTimerData.speakerTimes,
+                totalTime: currentTimerData.speakerTimes.reduce((sum, time) => sum + time.actualTime, 0),
+                timestamp: new Date().toISOString()
+            };
+            
+            timekeepingData.push(timekeepingRecord);
+            localStorage.setItem('timekeepingData', JSON.stringify(timekeepingData));
+            
+            document.getElementById('time-keeping').classList.add('hidden');
+            document.getElementById('manager-thank-you').classList.remove('hidden');
+        }
 
-            let printContent = `
-                <html>
-                <head>
-                    <title>Court Room ${courtRoom} - ${round} Results</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; margin: 20px; }
-                        .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 10px; }
-                        .team-section { margin-bottom: 30px; page-break-inside: avoid; }
-                        .team-header { background-color: #f0f0f0; padding: 10px; margin-bottom: 15px; }
-                        .speaker-section { margin-bottom: 20px; border: 1px solid #ddd; padding: 15px; }
-                        .criteria-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
-                        .criteria-table th, .criteria-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                        .criteria-table th { background-color: #f9f9f9; }
-                        .judge-scores { margin-top: 15px; }
-                        .total-score { font-weight: bold; font-size: 1.2em; color: #2563eb; }
-                        @media print { .no-print { display: none; } }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <h1>MCJS Mark -1</h1>
-                        <h2>VKT KRISHNADAS UNNI SOUNDARYA COLLEGE OF LAW</h2>
-                        <h3>${round} - Court Room ${courtRoom}</h3>
-                        <p>Generated on: ${new Date().toLocaleString()}</p>
-                    </div>
-            `;
+        function resetManagerPortal() {
+            document.getElementById('manager-login').classList.remove('hidden');
+            document.getElementById('time-keeping').classList.add('hidden');
+            document.getElementById('manager-thank-you').classList.add('hidden');
+            document.getElementById('time-setup').classList.remove('hidden');
+            document.getElementById('timer-display').classList.add('hidden');
+            document.getElementById('manager-login-form').reset();
+            
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            
+            currentManagerSession = null;
+            currentTimerData = null;
+            speakerQueue = [];
+            currentSpeakerIndex = 0;
+        }
 
-            Object.entries(teamData).forEach(([teamCode, scores]) => {
-                // Calculate averages
-                const avgScores = { speakers: [{ scores: [0, 0, 0, 0, 0, 0, 0], total: 0, gender: '' }, { scores: [0, 0, 0, 0, 0, 0, 0], total: 0, gender: '' }] };
+        // Dashboard Functions
+        function loadDashboard() {
+            const select = document.getElementById('dashboard-competition');
+            select.innerHTML = '<option value="">Select Competition</option>';
+            
+            competitions.forEach(comp => {
+                const option = document.createElement('option');
+                option.value = comp.id;
+                option.textContent = comp.competitionName;
+                select.appendChild(option);
+            });
+        }
 
-                scores.forEach(score => {
-                    score.speakers.forEach((speaker, speakerIndex) => {
-                        speaker.scores.forEach((criterionScore, criterionIndex) => {
-                            avgScores.speakers[speakerIndex].scores[criterionIndex] += criterionScore;
-                        });
-                        avgScores.speakers[speakerIndex].total += speaker.total;
-                        avgScores.speakers[speakerIndex].gender = speaker.gender;
-                    });
+        document.getElementById('dashboard-competition').addEventListener('change', function() {
+            const competitionId = this.value;
+            if (competitionId) {
+                loadDashboardContent(competitionId);
+                document.getElementById('dashboard-content').classList.remove('hidden');
+            } else {
+                document.getElementById('dashboard-content').classList.add('hidden');
+            }
+        });
+
+        function loadDashboardContent(competitionId) {
+            const competition = competitions.find(c => c.id == competitionId);
+            if (!competition) return;
+            
+            // Create round tabs
+            const tabsContainer = document.getElementById('round-tabs');
+            tabsContainer.innerHTML = '';
+            
+            const rounds = competition.rounds;
+            
+            // Add combined prelims tab if both prelims exist
+            if (rounds.includes('prelims1') && rounds.includes('prelims2')) {
+                rounds.splice(rounds.indexOf('prelims2') + 1, 0, 'combined-prelims');
+            }
+            
+            rounds.forEach((round, index) => {
+                const tab = document.createElement('button');
+                tab.className = `py-4 px-6 text-sm font-medium border-b-2 ${index === 0 ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`;
+                tab.textContent = round === 'combined-prelims' ? 'Combined Prelims' : round.charAt(0).toUpperCase() + round.slice(1);
+                tab.onclick = () => showRoundContent(competitionId, round, tab);
+                tabsContainer.appendChild(tab);
+            });
+            
+            // Show first round by default
+            if (rounds.length > 0) {
+                showRoundContent(competitionId, rounds[0]);
+            }
+        }
+
+        function showRoundContent(competitionId, round, clickedTab = null) {
+            // Update active tab
+            if (clickedTab) {
+                document.querySelectorAll('#round-tabs button').forEach(tab => {
+                    tab.className = tab.className.replace('border-blue-500 text-blue-600', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300');
                 });
+                clickedTab.className = clickedTab.className.replace('border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300', 'border-blue-500 text-blue-600');
+            }
+            
+            const content = document.getElementById('round-content');
+            
+            if (round === 'prelims1' || round === 'prelims2') {
+                showPrelimsContent(competitionId, round, content);
+            } else if (round === 'combined-prelims') {
+                showCombinedPrelimsContent(competitionId, content);
+            } else {
+                showKnockoutContent(competitionId, round, content);
+            }
+        }
 
-                const numJudges = scores.length;
-                avgScores.speakers.forEach(speaker => {
-                    speaker.scores = speaker.scores.map(score => (score / numJudges).toFixed(1));
-                    speaker.total = (speaker.total / numJudges).toFixed(1);
-                });
-
-                const totalTeamAvg = (parseFloat(avgScores.speakers[0].total) + parseFloat(avgScores.speakers[1].total)).toFixed(1);
-
-                printContent += `
-                    <div class="team-section">
-                        <div class="team-header">
-                            <h2>Team: ${teamCode}</h2>
-                            <p>Total Average Score: <span class="total-score">${totalTeamAvg}/200</span></p>
-                            <p>Judges: ${scores.map(s => s.judge).join(', ')}</p>
-                        </div>
-                `;
-
-                avgScores.speakers.forEach((speaker, speakerIndex) => {
-                    const genderIcon = speaker.gender === 'male' ? '♂' : '♀';
-                    printContent += `
-                        <div class="speaker-section">
-                            <h3>${genderIcon} Speaker ${speakerIndex + 1} - Average Score: ${speaker.total}/100</h3>
-                            <table class="criteria-table">
-                                <thead>
-                                    <tr>
-                                        <th>Criteria</th>
-                                        <th>Max Score</th>
-                                        <th>Average Score</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                    `;
-
-                    speaker.scores.forEach((avgScore, criterionIndex) => {
-                        const maxScore = criterionIndex === 3 || criterionIndex === 4 ? 20 : 10;
-                        printContent += `
+        function showPrelimsContent(competitionId, round, container) {
+            const scores = judgeScores.filter(score => 
+                score.judgeSession.competitionId == competitionId &&
+                score.judgeSession.assignment.round === round
+            );
+            
+            container.innerHTML = `
+                <h3 class="text-2xl font-semibold mb-6">${round.charAt(0).toUpperCase() + round.slice(1)} Results</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white border border-gray-200">
+                        <thead class="bg-gray-50">
                             <tr>
-                                <td>${criteria[criterionIndex]}</td>
-                                <td>${maxScore}</td>
-                                <td>${avgScore}</td>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Team Code</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Score</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
-                        `;
-                    });
-
-                    printContent += `
-                                </tbody>
-                            </table>
-                            
-                            <div class="judge-scores">
-                                <h4>Individual Judge Scores:</h4>
-                    `;
-
-                    scores.forEach(score => {
-                        const speakerScore = score.speakers[speakerIndex];
-                        printContent += `<p><strong>${score.judge}:</strong> ${speakerScore.total}/100</p>`;
-                    });
-
-                    printContent += `
-                            </div>
-                        </div>
-                    `;
-                });
-
-                printContent += `</div>`;
-            });
-
-            printContent += `
-                </body>
-                </html>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            ${generatePrelimsRows(scores)}
+                        </tbody>
+                    </table>
+                </div>
             `;
-
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(printContent);
-            printWindow.document.close();
-            printWindow.print();
         }
 
-        function closeScoreDetail() {
-            document.getElementById('scoreDetailModal').classList.add('hidden');
-        }
-
-        function showThankYouCertificate() {
-            const currentJudge = currentAssignment.currentJudge;
-            const currentDate = new Date().toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
+        function generatePrelimsRows(scores) {
+            // Group scores by team
+            const teamScores = {};
+            scores.forEach(score => {
+                if (!teamScores[score.teamCode]) {
+                    teamScores[score.teamCode] = [];
+                }
+                teamScores[score.teamCode].push(score);
             });
+            
+            // Calculate average scores for each team
+            const teamAverages = Object.keys(teamScores).map(teamCode => {
+                const teamScoreList = teamScores[teamCode];
+                const totalScore = teamScoreList.reduce((sum, score) => sum + score.teamTotal, 0);
+                const averageScore = totalScore / teamScoreList.length;
+                
+                return {
+                    teamCode,
+                    averageScore: averageScore.toFixed(2),
+                    scores: teamScoreList
+                };
+            });
+            
+            // Sort by average score (descending)
+            teamAverages.sort((a, b) => b.averageScore - a.averageScore);
+            
+            return teamAverages.map((team, index) => `
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${index + 1}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 cursor-pointer text-blue-600 hover:text-blue-800" onclick="showTeamDetails('${team.teamCode}')">${team.teamCode}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${team.averageScore}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <button onclick="downloadTeamPDF('${team.teamCode}')" class="bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded text-xs transition-colors">Download PDF</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
 
-            const certificateHTML = `
-                <div class="bg-gradient-to-br from-blue-50 via-white to-purple-50 p-8 rounded-2xl border-4 border-gradient-to-r from-blue-400 to-purple-400 text-center">
-                    <!-- Decorative Header -->
-                    <div class="mb-8">
-                        <div class="flex justify-center items-center space-x-4 mb-4">
-                            <div class="w-16 h-16 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center">
-                                <span class="text-3xl">🏆</span>
-                            </div>
-                            <div class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                                CERTIFICATE OF APPRECIATION
-                            </div>
-                            <div class="w-16 h-16 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center">
-                                <span class="text-3xl">⚖️</span>
-                            </div>
-                        </div>
-                        <div class="w-32 h-1 bg-gradient-to-r from-blue-400 to-purple-400 mx-auto rounded-full"></div>
-                    </div>
+        function showCombinedPrelimsContent(competitionId, container) {
+            const prelims1Scores = judgeScores.filter(score => 
+                score.judgeSession.competitionId == competitionId &&
+                score.judgeSession.assignment.round === 'prelims1'
+            );
+            
+            const prelims2Scores = judgeScores.filter(score => 
+                score.judgeSession.competitionId == competitionId &&
+                score.judgeSession.assignment.round === 'prelims2'
+            );
+            
+            // Combine scores
+            const teamScores = {};
+            
+            [...prelims1Scores, ...prelims2Scores].forEach(score => {
+                if (!teamScores[score.teamCode]) {
+                    teamScores[score.teamCode] = {
+                        prelims1: [],
+                        prelims2: [],
+                        totalTime: 0
+                    };
+                }
+                
+                if (score.judgeSession.assignment.round === 'prelims1') {
+                    teamScores[score.teamCode].prelims1.push(score);
+                } else {
+                    teamScores[score.teamCode].prelims2.push(score);
+                }
+            });
+            
+            // Add timing data
+            timekeepingData.forEach(timeData => {
+                const assignment = timeData.managerSession.assignment;
+                const petitionerCode = assignment.petitionerCode;
+                const respondentCode = assignment.respondentCode;
+                
+                if (teamScores[petitionerCode]) {
+                    const petitionerTime = timeData.speakerTimes
+                        .filter(t => t.team === 'Petitioner')
+                        .reduce((sum, t) => sum + t.actualTime, 0);
+                    teamScores[petitionerCode].totalTime += petitionerTime;
+                }
+                
+                if (teamScores[respondentCode]) {
+                    const respondentTime = timeData.speakerTimes
+                        .filter(t => t.team === 'Respondent')
+                        .reduce((sum, t) => sum + t.actualTime, 0);
+                    teamScores[respondentCode].totalTime += respondentTime;
+                }
+            });
+            
+            // Calculate combined scores
+            const combinedResults = Object.keys(teamScores).map(teamCode => {
+                const team = teamScores[teamCode];
+                
+                const prelims1Avg = team.prelims1.length > 0 ? 
+                    team.prelims1.reduce((sum, score) => sum + score.teamTotal, 0) / team.prelims1.length : 0;
+                const prelims2Avg = team.prelims2.length > 0 ? 
+                    team.prelims2.reduce((sum, score) => sum + score.teamTotal, 0) / team.prelims2.length : 0;
+                
+                return {
+                    teamCode,
+                    prelims1Score: prelims1Avg.toFixed(2),
+                    prelims2Score: prelims2Avg.toFixed(2),
+                    combinedScore: (prelims1Avg + prelims2Avg).toFixed(2),
+                    totalTime: team.totalTime
+                };
+            });
+            
+            // Sort by combined score, then by time (for tie-breaking)
+            combinedResults.sort((a, b) => {
+                if (b.combinedScore !== a.combinedScore) {
+                    return b.combinedScore - a.combinedScore;
+                }
+                return a.totalTime - b.totalTime; // Less time is better
+            });
+            
+            // Mark top 16 for qualification
+            const qualifiedTeams = combinedResults.slice(0, 16);
+            
+            container.innerHTML = `
+                <h3 class="text-2xl font-semibold mb-6">Combined Prelims Results</h3>
+                <div class="mb-4 text-sm text-gray-600">
+                    <p>Top 16 teams qualify for Octa Finals. Ties are broken by total time taken (less time is better).</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full bg-white border border-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rank</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Team Code</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prelims 1</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prelims 2</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Combined</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Time</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            ${combinedResults.map((team, index) => `
+                                <tr class="${index < 16 ? 'bg-green-50' : 'bg-red-50'}">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${index + 1}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 cursor-pointer text-blue-600 hover:text-blue-800" onclick="showTeamDetails('${team.teamCode}')">${team.teamCode}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${team.prelims1Score}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${team.prelims2Score}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">${team.combinedScore}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${Math.floor(team.totalTime / 60)}:${Math.floor(team.totalTime % 60).toString().padStart(2, '0')}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium ${index < 16 ? 'text-green-600' : 'text-red-600'}">${index < 16 ? 'Qualified' : 'Eliminated'}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <button onclick="downloadTeamPDF('${team.teamCode}')" class="bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded text-xs transition-colors">Download PDF</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
 
-                    <!-- Institution Header -->
-                    <div class="mb-8">
-                        <h1 class="text-2xl font-bold text-gray-800 mb-2">VKT KRISHNADAS UNNI</h1>
-                        <h2 class="text-xl font-semibold text-gray-700 mb-4">SOUNDARYA COLLEGE OF LAW</h2>
-                        <p class="text-lg text-gray-600 italic">Presents this Certificate of Appreciation to</p>
-                    </div>
+        function showKnockoutContent(competitionId, round, container) {
+            container.innerHTML = `
+                <h3 class="text-2xl font-semibold mb-6">${round.charAt(0).toUpperCase() + round.slice(1)} - Knockout Round</h3>
+                <div class="text-center text-gray-600">
+                    <p>Knockout round results will be displayed here based on match outcomes.</p>
+                    <p class="mt-2">This feature requires match result input functionality.</p>
+                </div>
+            `;
+        }
 
-                    <!-- Judge Name -->
-                    <div class="mb-8">
-                        <div class="bg-gradient-to-r from-blue-100 to-purple-100 rounded-xl p-6 mb-4">
-                            <h2 class="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-                                Hon'ble ${currentJudge}
-                            </h2>
-                            <div class="w-24 h-1 bg-gradient-to-r from-blue-400 to-purple-400 mx-auto rounded-full"></div>
-                        </div>
-                    </div>
-
-                    <!-- Appreciation Text -->
-                    <div class="mb-8 max-w-3xl mx-auto">
-                        <p class="text-lg text-gray-700 leading-relaxed mb-4">
-                            In recognition of your invaluable contribution and distinguished service as an esteemed judge 
-                            in the <strong>MCJS Mark-1 Moot Court Competition</strong>. Your expertise, dedication, and 
-                            commitment to upholding the highest standards of legal excellence have been instrumental 
-                            in ensuring the success of this prestigious competition.
-                        </p>
-                        <p class="text-lg text-gray-700 leading-relaxed">
-                            Your thoughtful evaluation and constructive feedback have not only enriched the learning 
-                            experience of the participating students but have also contributed significantly to the 
-                            advancement of legal education and advocacy skills.
-                        </p>
-                    </div>
-
-                    <!-- Competition Details -->
-                    <div class="mb-8">
-                        <div class="bg-gray-50 rounded-xl p-6">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Competition Details</h3>
-                            <div class="grid md:grid-cols-2 gap-4 text-sm">
-                                <div class="text-left">
-                                    <p><strong>Round:</strong> ${currentAssignment.round}</p>
-                                    <p><strong>Court Room:</strong> ${currentAssignment.courtRoom}</p>
+        function showTeamDetails(teamCode) {
+            const teamScores = judgeScores.filter(score => score.teamCode === teamCode);
+            const teamTiming = timekeepingData.filter(timeData => 
+                timeData.managerSession.assignment.petitionerCode === teamCode ||
+                timeData.managerSession.assignment.respondentCode === teamCode
+            );
+            
+            let detailsHTML = `
+                <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" onclick="closeTeamDetails()">
+                    <div class="relative top-20 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white" onclick="event.stopPropagation()">
+                        <div class="mt-3">
+                            <h3 class="text-2xl font-semibold text-gray-900 mb-4">Team ${teamCode} - Detailed Scores</h3>
+                            <div class="space-y-6">
+            `;
+            
+            teamScores.forEach(score => {
+                detailsHTML += `
+                    <div class="border rounded-lg p-4">
+                        <h4 class="text-lg font-semibold mb-2">${score.judgeSession.assignment.round} - ${score.team} - Judge: ${score.judgeSession.judgeName}</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="border rounded p-3">
+                                <h5 class="font-semibold mb-2">Speaker 1 (${score.speaker1.gender})</h5>
+                                <div class="text-sm space-y-1">
+                                    <div>Perusal of Facts: ${score.speaker1.perusal}/10</div>
+                                    <div>Knowledge & Application: ${score.speaker1.knowledge}/20</div>
+                                    <div>Organization & Presentation: ${score.speaker1.organization}/20</div>
+                                    <div>Clarity & Reasoning: ${score.speaker1.clarity}/20</div>
+                                    <div>Persuasiveness: ${score.speaker1.persuasiveness}/20</div>
+                                    <div>Team Coordination: ${score.speaker1.coordination}/10</div>
+                                    <div>Courtroom Etiquette: ${score.speaker1.etiquette}/10</div>
+                                    <div class="font-semibold">Total: ${score.speaker1.total}/110</div>
                                 </div>
-                                <div class="text-left">
-                                    <p><strong>Date:</strong> ${currentDate}</p>
-                                    <p><strong>Teams Judged:</strong> ${currentAssignment.petitionerCode} vs ${currentAssignment.respondentCode}</p>
+                            </div>
+                            <div class="border rounded p-3">
+                                <h5 class="font-semibold mb-2">Speaker 2 (${score.speaker2.gender})</h5>
+                                <div class="text-sm space-y-1">
+                                    <div>Perusal of Facts: ${score.speaker2.perusal}/10</div>
+                                    <div>Knowledge & Application: ${score.speaker2.knowledge}/20</div>
+                                    <div>Organization & Presentation: ${score.speaker2.organization}/20</div>
+                                    <div>Clarity & Reasoning: ${score.speaker2.clarity}/20</div>
+                                    <div>Persuasiveness: ${score.speaker2.persuasiveness}/20</div>
+                                    <div>Team Coordination: ${score.speaker2.coordination}/10</div>
+                                    <div>Courtroom Etiquette: ${score.speaker2.etiquette}/10</div>
+                                    <div class="font-semibold">Total: ${score.speaker2.total}/110</div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Closing -->
-                    <div class="mb-8">
-                        <p class="text-lg text-gray-700 mb-4">
-                            We extend our heartfelt gratitude for your time, expertise, and unwavering commitment 
-                            to nurturing the next generation of legal professionals.
-                        </p>
-                        <p class="text-xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                            Thank You for Your Distinguished Service!
-                        </p>
-                    </div>
-
-                    <!-- Signature Section -->
-                    <div class="flex justify-between items-end mt-12 pt-8 border-t-2 border-gray-200">
-                        <div class="text-center">
-                            <div class="w-32 h-0.5 bg-gray-400 mb-2"></div>
-                            <p class="text-sm font-semibold text-gray-700">Competition Coordinator</p>
-                            <p class="text-xs text-gray-500">MCJS Mark-1</p>
+                        <div class="mt-3 text-center">
+                            <div class="text-lg font-semibold">Team Total: ${score.teamTotal}/220</div>
                         </div>
-                        
-                        <div class="text-center">
-                            <div class="w-16 h-16 bg-gradient-to-r from-red-400 to-red-600 rounded-full flex items-center justify-center mb-2">
-                                <span class="text-2xl">🏛️</span>
+                    </div>
+                `;
+            });
+            
+            // Add timing information
+            teamTiming.forEach(timeData => {
+                const isTeamPetitioner = timeData.managerSession.assignment.petitionerCode === teamCode;
+                const teamType = isTeamPetitioner ? 'Petitioner' : 'Respondent';
+                const relevantTimes = timeData.speakerTimes.filter(t => t.team === teamType);
+                
+                detailsHTML += `
+                    <div class="border rounded-lg p-4 bg-blue-50">
+                        <h4 class="text-lg font-semibold mb-2">Timing Data - ${timeData.managerSession.round} (${teamType})</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            ${relevantTimes.map(time => `
+                                <div class="text-sm">
+                                    <div class="font-semibold">${time.speaker}</div>
+                                    <div>Allocated: ${Math.floor(time.allocatedTime / 60)}:${Math.floor(time.allocatedTime % 60).toString().padStart(2, '0')}</div>
+                                    <div>Actual: ${Math.floor(time.actualTime / 60)}:${Math.floor(time.actualTime % 60).toString().padStart(2, '0')}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            detailsHTML += `
                             </div>
-                            <p class="text-xs text-gray-500">Official Seal</p>
+                            <div class="mt-6 text-center">
+                                <button onclick="closeTeamDetails()" class="bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded transition-colors">Close</button>
+                            </div>
                         </div>
-                        
-                        <div class="text-center">
-                            <div class="w-32 h-0.5 bg-gray-400 mb-2"></div>
-                            <p class="text-sm font-semibold text-gray-700">Principal</p>
-                            <p class="text-xs text-gray-500">Soundarya College of Law</p>
-                        </div>
-                    </div>
-
-                    <!-- Date -->
-                    <div class="mt-6 text-center">
-                        <p class="text-sm text-gray-600">Issued on ${currentDate}</p>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="mt-8 flex justify-center space-x-4">
-                        <button onclick="printCertificate()" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
-                            🖨️ Print Certificate
-                        </button>
-                        <button onclick="closeCertificateAndReturn()" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg">
-                            ✅ Done
-                        </button>
                     </div>
                 </div>
             `;
-
-            document.getElementById('certificateContent').innerHTML = certificateHTML;
-            document.getElementById('thankYouModal').classList.remove('hidden');
+            
+            document.body.insertAdjacentHTML('beforeend', detailsHTML);
         }
 
-        function printCertificate() {
-            const currentJudge = currentAssignment.currentJudge;
-            const currentDate = new Date().toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
+        function closeTeamDetails() {
+            const modal = document.querySelector('.fixed.inset-0');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        function downloadTeamPDF(teamCode) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            const teamScores = judgeScores.filter(score => score.teamCode === teamCode);
+            const teamTiming = timekeepingData.filter(timeData => 
+                timeData.managerSession.assignment.petitionerCode === teamCode ||
+                timeData.managerSession.assignment.respondentCode === teamCode
+            );
+            
+            doc.setFontSize(20);
+            doc.text(`Team ${teamCode} - Score Sheet`, 20, 20);
+            
+            let yPosition = 40;
+            
+            teamScores.forEach(score => {
+                doc.setFontSize(14);
+                doc.text(`${score.judgeSession.assignment.round} - ${score.team}`, 20, yPosition);
+                doc.text(`Judge: ${score.judgeSession.judgeName}`, 20, yPosition + 10);
+                
+                yPosition += 25;
+                
+                doc.setFontSize(10);
+                doc.text('Speaker 1:', 20, yPosition);
+                doc.text(`Gender: ${score.speaker1.gender}`, 80, yPosition);
+                doc.text(`Total: ${score.speaker1.total}/110`, 140, yPosition);
+                
+                yPosition += 15;
+                
+                doc.text('Speaker 2:', 20, yPosition);
+                doc.text(`Gender: ${score.speaker2.gender}`, 80, yPosition);
+                doc.text(`Total: ${score.speaker2.total}/110`, 140, yPosition);
+                
+                yPosition += 15;
+                
+                doc.setFontSize(12);
+                doc.text(`Team Total: ${score.teamTotal}/220`, 20, yPosition);
+                
+                yPosition += 25;
+                
+                if (yPosition > 250) {
+                    doc.addPage();
+                    yPosition = 20;
+                }
             });
-
-            const printContent = `
-                <html>
-                <head>
-                    <title>Certificate of Appreciation - ${currentJudge}</title>
-                    <style>
-                        body { 
-                            font-family: 'Times New Roman', serif; 
-                            margin: 0; 
-                            padding: 40px;
-                            background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 50%, #faf5ff 100%);
-                        }
-                        .certificate {
-                            max-width: 800px;
-                            margin: 0 auto;
-                            padding: 60px;
-                            border: 8px solid #1e40af;
-                            border-radius: 20px;
-                            background: white;
-                            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-                        }
-                        .header {
-                            text-align: center;
-                            margin-bottom: 40px;
-                        }
-                        .title {
-                            font-size: 36px;
-                            font-weight: bold;
-                            color: #1e40af;
-                            margin-bottom: 20px;
-                            text-transform: uppercase;
-                            letter-spacing: 2px;
-                        }
-                        .institution {
-                            font-size: 24px;
-                            font-weight: bold;
-                            color: #374151;
-                            margin-bottom: 10px;
-                        }
-                        .college {
-                            font-size: 20px;
-                            color: #6b7280;
-                            margin-bottom: 30px;
-                        }
-                        .presents {
-                            font-size: 18px;
-                            color: #6b7280;
-                            font-style: italic;
-                            margin-bottom: 30px;
-                        }
-                        .judge-name {
-                            font-size: 48px;
-                            font-weight: bold;
-                            color: #7c3aed;
-                            margin: 30px 0;
-                            text-decoration: underline;
-                            text-decoration-color: #fbbf24;
-                        }
-                        .appreciation-text {
-                            font-size: 16px;
-                            line-height: 1.8;
-                            color: #374151;
-                            text-align: justify;
-                            margin: 30px 0;
-                        }
-                        .competition-details {
-                            background-color: #f9fafb;
-                            padding: 20px;
-                            border-radius: 10px;
-                            margin: 30px 0;
-                        }
-                        .details-title {
-                            font-size: 18px;
-                            font-weight: bold;
-                            color: #374151;
-                            margin-bottom: 15px;
-                            text-align: center;
-                        }
-                        .details-grid {
-                            display: grid;
-                            grid-template-columns: 1fr 1fr;
-                            gap: 15px;
-                        }
-                        .detail-item {
-                            font-size: 14px;
-                            color: #6b7280;
-                        }
-                        .closing {
-                            font-size: 16px;
-                            color: #374151;
-                            text-align: center;
-                            margin: 30px 0;
-                        }
-                        .thank-you {
-                            font-size: 24px;
-                            font-weight: bold;
-                            color: #7c3aed;
-                            text-align: center;
-                            margin: 20px 0;
-                        }
-                        .signatures {
-                            display: flex;
-                            justify-content: space-between;
-                            margin-top: 60px;
-                            padding-top: 30px;
-                            border-top: 2px solid #e5e7eb;
-                        }
-                        .signature {
-                            text-align: center;
-                            width: 200px;
-                        }
-                        .signature-line {
-                            width: 150px;
-                            height: 1px;
-                            background-color: #6b7280;
-                            margin: 0 auto 10px;
-                        }
-                        .signature-title {
-                            font-size: 14px;
-                            font-weight: bold;
-                            color: #374151;
-                        }
-                        .signature-subtitle {
-                            font-size: 12px;
-                            color: #6b7280;
-                        }
-                        .seal {
-                            text-align: center;
-                            width: 100px;
-                        }
-                        .seal-circle {
-                            width: 60px;
-                            height: 60px;
-                            border: 3px solid #dc2626;
-                            border-radius: 50%;
-                            margin: 0 auto 10px;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            font-size: 24px;
-                        }
-                        .date-issued {
-                            text-align: center;
-                            margin-top: 30px;
-                            font-size: 14px;
-                            color: #6b7280;
-                        }
-                        @media print {
-                            body { background: white; }
-                            .certificate { box-shadow: none; }
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="certificate">
-                        <div class="header">
-                            <div class="title">Certificate of Appreciation</div>
-                            <div class="institution">VKT KRISHNADAS UNNI</div>
-                            <div class="college">SOUNDARYA COLLEGE OF LAW</div>
-                            <div class="presents">Presents this Certificate of Appreciation to</div>
-                        </div>
-
-                        <div class="judge-name">Hon'ble ${currentJudge}</div>
-
-                        <div class="appreciation-text">
-                            In recognition of your invaluable contribution and distinguished service as an esteemed judge 
-                            in the <strong>MCJS Mark-1 Moot Court Competition</strong>. Your expertise, dedication, and 
-                            commitment to upholding the highest standards of legal excellence have been instrumental 
-                            in ensuring the success of this prestigious competition.
-                            <br><br>
-                            Your thoughtful evaluation and constructive feedback have not only enriched the learning 
-                            experience of the participating students but have also contributed significantly to the 
-                            advancement of legal education and advocacy skills.
-                        </div>
-
-                        <div class="competition-details">
-                            <div class="details-title">Competition Details</div>
-                            <div class="details-grid">
-                                <div class="detail-item"><strong>Round:</strong> ${currentAssignment.round}</div>
-                                <div class="detail-item"><strong>Date:</strong> ${currentDate}</div>
-                                <div class="detail-item"><strong>Court Room:</strong> ${currentAssignment.courtRoom}</div>
-                                <div class="detail-item"><strong>Teams Judged:</strong> ${currentAssignment.petitionerCode} vs ${currentAssignment.respondentCode}</div>
-                            </div>
-                        </div>
-
-                        <div class="closing">
-                            We extend our heartfelt gratitude for your time, expertise, and unwavering commitment 
-                            to nurturing the next generation of legal professionals.
-                        </div>
-
-                        <div class="thank-you">Thank You for Your Distinguished Service!</div>
-
-                        <div class="signatures">
-                            <div class="signature">
-                                <div class="signature-line"></div>
-                                <div class="signature-title">Competition Coordinator</div>
-                                <div class="signature-subtitle">MCJS Mark-1</div>
-                            </div>
-                            
-                            <div class="seal">
-                                <div class="seal-circle">🏛️</div>
-                                <div class="signature-subtitle">Official Seal</div>
-                            </div>
-                            
-                            <div class="signature">
-                                <div class="signature-line"></div>
-                                <div class="signature-title">Principal</div>
-                                <div class="signature-subtitle">Soundarya College of Law</div>
-                            </div>
-                        </div>
-
-                        <div class="date-issued">Issued on ${currentDate}</div>
-                    </div>
-                </body>
-                </html>
-            `;
-
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(printContent);
-            printWindow.document.close();
-            printWindow.print();
+            
+            doc.save(`Team_${teamCode}_ScoreSheet.pdf`);
         }
 
-        function closeCertificateAndReturn() {
-            document.getElementById('thankYouModal').classList.add('hidden');
-            showLoginScreen();
-        }
-
-        // Initialize the app
-        showLoginScreen();
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            showPortal('admin');
+        });
     </script>
-    <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'96650fba93287f7f',t:'MTc1MzcxMjg5MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
-</body>
-
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96759ddea2106cd6',t:'MTc1Mzg4NjQ4NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
